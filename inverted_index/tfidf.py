@@ -31,19 +31,40 @@ def compute_idf(term, idf_freq, term_freq, N):
         idf_freq[term] = idf
     return idf
 
+def cosine_sim(Q, Doc):  
+  return round(np.dot(Q, Doc) / (np.linalg.norm(Q)*np.linalg.norm(Doc)),3)
+
+def create_inverted_index(textos_tfidf):
+    matriz = []
+    for doc1 in textos_tfidf.values():
+        row = []
+        array1 = np.array(list(doc1))
+        for doc2 in textos_tfidf.values():
+            array2 = np.array(list(doc2))
+            row.append(cosine_sim(array1, array2))
+        matriz.append(row)
+
+    count = 1
+    print("      doc1   doc2   doc3   doc4   doc5   doc6")
+    for row in matriz:
+        print("doc" + str(count), row)
+        count += 1
+
 def compute_tfidf(collection):
-    tfidf_dict = {} # Contar tfidf de cada término en cada documento
+    tfidf = {}
     idf_freq = {}
+    index = {}
+    length = {}
+
     term_freq, orden_keywords = compute_tf(collection) # Contar la frecuencia de cada término en cada documento
 
-    index = {}
     for doc_id, doc in enumerate(collection):
-        lstWords = []
         nameDoc = "doc"+str(doc_id+1)
-        
+        smoothed_tf = []
+
         for tup_term in orden_keywords:
             term = tup_term[0]
-
+            #compute index
             if term in term_freq[doc_id]:
                 if term_freq[doc_id][term] != 0:
                     if term in index:
@@ -53,20 +74,15 @@ def compute_tfidf(collection):
                 #Term Frequency + Smoothing
                 tf = np.log10(term_freq[doc_id][term]+1)
                 idf = compute_idf(term, idf_freq, term_freq, len(collection))
-                lstWords.append(round(tf * idf, 3))
+                smoothed_tf.append(round(tf * idf, 3))
             else:
-                lstWords.append(0)
-        tfidf_dict[nameDoc] = lstWords
+                smoothed_tf.append(0)
+        
+        #compute length
+        array = np.array(list(smoothed_tf))
+        length[nameDoc] = np.linalg.norm(array)
+        tfidf[nameDoc] = smoothed_tf
+    
+    create_inverted_index(tfidf)
 
-    return tfidf_dict, idf_freq, index
-
-def compute_length(tfidf):
-    length = {}
-    for doc in tfidf.items():
-        array = np.array(list(doc[1]))
-        length[doc[0]] = np.linalg.norm(array)
-
-    return length
-
-def cosine_sim(Q, Doc):  
-  return round(np.dot(Q, Doc) / (np.linalg.norm(Q)*np.linalg.norm(Doc)),3)
+    return length, idf_freq, index

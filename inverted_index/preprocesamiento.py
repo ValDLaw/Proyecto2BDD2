@@ -12,10 +12,10 @@ def tokenizar(texto):
 
 def eliminarStopWords(tokenText):
     #elegir stopwords
-    customSW = open('docs/stopwords.txt','r')
+    customSW = open('inverted_index/docs/stopwords.txt','r')
     stoplist = customSW.read().splitlines()
     customSW.close()
-    stoplist += [".", "?", "¿", "-", "!", ",", ":",";","«","»", ")", "(", "'", "```", "``"]
+    stoplist += [".", "?", "¿", "-", "!", ",", ":",";","«", "con", "»", ")", "(", "'", "```", "iii", "``"]    
 
     #reducir palabras
     tokensLst = []
@@ -33,7 +33,7 @@ def preprocesar_query(query):
 def preprocesar_textos(textos):
     textos_procesados = []
     for file_name in textos:
-        file = open("docs/"+file_name)
+        file = open("inverted_index/docs/"+file_name)
         texto = file.read().rstrip()
         tokenText = tokenizar(texto)
         tokensLst = eliminarStopWords(tokenText)

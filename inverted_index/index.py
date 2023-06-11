@@ -1,5 +1,5 @@
-from preprocesamiento import preprocesar_query, preprocesar_textos
-from tfidf import compute_tfidf, compute_length
+from inverted_index.preprocesamiento import preprocesar_query, preprocesar_textos
+from inverted_index.tfidf import compute_tfidf
 
 class InvertIndex:
     def __init__(self, index_file):
@@ -10,12 +10,7 @@ class InvertIndex:
     
     def building(self, textos):
         collection = preprocesar_textos(textos)
-        textos_tfidf, self.idf, self.index  = compute_tfidf(collection)
-
-        # compute the length (norm)
-        self.length = compute_length(textos_tfidf)
-
-        # store in disk
+        self.index, self.idf, self.length = compute_tfidf(collection)
         self.save_index(self.index_file)
 
     def retrieval(self, query, k):
