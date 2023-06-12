@@ -1,61 +1,154 @@
+
+
 <template>
   <div class="scrollable-content">
     <div class="background-image"></div>
+    <header v-fadeout="{ scrollThreshold: 100 }">
+      <!-- Aquí va tu logo -->
+      <img src="./assets/arxiv_logo.png" alt="Logo" />
+    </header>
     <div class="search-container">
       <div class="search-input">
-        <input type="text" v-model="searchTerm" placeholder="Buscar" />
+        <input type="text" v-model="searchTerm" placeholder="Search scholarly articles" />
         <input type="number" v-model.number="topK" placeholder="Cantidad K" />
-        <button @click="search" class="search-button">Buscar</button>
+        <button @click="search" class="search-button">Search</button>
       </div>
+    </div>
 
-      <ul v-if="searchResults.length > 0" class="search-results">
-        <li v-for="(item, index) in searchResults" :key="index">{{ item }}</li>
-      </ul>
-
-      <p v-else class="no-results" v-if="searched && searchResults.length === 0">
-        No se encontraron resultados.
-      </p>
+    <div class="container">
+      <div class="button-container">
+        <button @click="seleccionarTabla('tablaA')" class="selection-button">Tabla A</button>
+        <button @click="seleccionarTabla('tablaB')" class="selection-button">Tabla B</button>
+        <button @click="seleccionarTabla('tablaC')" class="selection-button">Tabla C</button>
+      </div>
+      
+      <!-- Aquí se mostrará la tabla seleccionada -->
+      <div v-if="tablaSeleccionada === 'tablaA'" class="tabla-container">
+        <table class="my-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Edad</th>
+              <th>País</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(persona, index) in listaPersonas" :key="index">
+              <td>{{ persona.nombre }}</td>
+              <td>{{ persona.edad }}</td>
+              <td>{{ persona.pais }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-if="tablaSeleccionada === 'tablaB'" class="tabla-container">
+        <!-- Código HTML de la tabla B -->
+      </div>
+      <div v-if="tablaSeleccionada === 'tablaC'" class="tabla-container">
+        <!-- Código HTML de la tabla C -->
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  directives: {
+    fadeout: {
+      inserted: function(el, binding) {
+        const scrollThreshold = binding.value.scrollThreshold || 100;
+        let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        window.addEventListener('scroll', function() {
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const isScrolled = scrollTop > lastScrollTop;
+
+          if (isScrolled && scrollTop > scrollThreshold) {
+            el.style.opacity = '0';
+          } else {
+            el.style.opacity = '1';
+          }
+
+          lastScrollTop = scrollTop;
+        });
+      },
+    },
+  },
   data() {
     return {
+      isScrolled: false,
       searchTerm: '',
+      tablaSeleccionada: 'tablaA',
       topK: 5, // Valor predeterminado para el top K
-      dictionary: {
-        // Diccionario ejemplo de prueba
-        apple: 'manzana',
-        banana: 'plátano',
-        cherry: 'cereza',
-        orange: 'naranja',
-        peach: 'durazno',
-        pineapple: 'piña',
-      },
-      searchResults: [],
+      listaPersonas: [
+        { nombre: "Juan", edad: 25, pais: "Argentina" },
+        { nombre: "María", edad: 30, pais: "España" },
+        { nombre: "Carlos", edad: 40, pais: "México" },
+        { nombre: "Juan", edad: 25, pais: "Argentina" },
+        { nombre: "María", edad: 30, pais: "España" },
+        { nombre: "Carlos", edad: 40, pais: "México" },
+        
+      ],
+      searchResultsColumn1: [],
+      searchResultsColumn2: [],
     };
+  },
+  mounted() {
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
     search() {
-      const results = [];
+      const resultsColumn1 = [];
+      const resultsColumn2 = [];
       const searchTerm = this.searchTerm.toLowerCase();
       let count = 0;
 
-      // Logica para coincidencias
+      // Lógica para coincidencias y distribución en columnas
+      for (const key in this.dictionary) {
+        if (key.includes(searchTerm)) {
+          if (count < this.topK) {
+            if (count % 2 === 0) {
+              resultsColumn1.push(this.dictionary[key]);
+            } else {
+              resultsColumn2.push(this.dictionary[key]);
+            }
+            count++;
+          } else {
+            break;
+          }
+        }
+      }
 
-      this.searchResults = results;
+      this.searchResultsColumn1 = resultsColumn1;
+      this.searchResultsColumn2 = resultsColumn2;
+    },
+    seleccionarTabla(tabla) {
+      this.tablaSeleccionada = tabla;
+    },
+    handleScroll() {
+      this.isScrolled = window.pageYOffset > 0;
     },
   },
 };
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 .scrollable-content {
   position: relative;
   overflow-y: scroll;
   height: 100vh;
+}
+
+header {
+  transition: opacity 0.3s;
+}
+
+header img {
+  height: 100px; /* Ajusta la altura según tu logo */
 }
 
 .background-image {
@@ -96,13 +189,18 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
+  max-width: 400px;
   margin: 0 auto;
   background-color: white;
   padding: 20px;
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .search-input {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -125,18 +223,62 @@ export default {
   border-radius: 4px;
   cursor: pointer;
 }
-
-.search-results {
-  list-style: none;
-  padding: 0;
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
 
-.search-results li {
-  margin-bottom: 4px;
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 800px;
+  width: 60%;
+  height: fit-content;
+  background-color: white;
+  padding: 20px;
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
 }
 
-.no-results {
-  color: #ff0000;
-  font-style: italic;
+.selection-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.my-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.my-table th,
+.my-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+.my-table th {
+  background-color: #f2f2f2;
+}
+
+.my-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.my-table tbody tr:hover {
+  background-color: #e9e9e9;
+}
+.tabla-container {
+  background-color: white;
+  width: 100%;
 }
 </style>
