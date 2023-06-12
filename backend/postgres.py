@@ -4,24 +4,24 @@ import psycopg2
 
 # Configura la aplicación Flask
 app = Flask(__name__)
-CORS(app)  # Permite peticiones CORS desde el cliente Vue.js
+CORS(app)
 
 # Configura la conexión a la base de datos PostgreSQL
 connection = psycopg2.connect(
     host='localhost',
-    database='tu_basededatos',
-    user='tu_usuario',
-    password='tu_contraseña'
+    database='Proyecto2BDD2',
+    user='postgres',
+    password='onepiecelaw'
 )
 cursor = connection.cursor()
 
-# Define una ruta para ejecutar la consulta con parámetros proporcionados por el usuario
+
 @app.route('/consulta')
 def consulta():
     parametro = request.args.get('parametro')
 
     try:
-        consulta = 'SELECT * FROM tabla WHERE columna = %s'
+        consulta = 'SELECT * FROM article WHERE columna = %s'
         cursor.execute(consulta, (parametro,))
         result = cursor.fetchall()
         return jsonify(result)
@@ -31,4 +31,4 @@ def consulta():
 
 # Ejecuta la aplicación Flask en el puerto especificado
 if __name__ == '__main__':
-    app.run(port=3000)
+    app.run(port=5432)
