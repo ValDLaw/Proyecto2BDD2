@@ -12,7 +12,7 @@
 ## Database
 ### JSON to CSV
 ### PostgreSQL DB
-Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando
+Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
 ``` sql
 CREATE TABLE article (
 	id FLOAT PRIMARY KEY,
@@ -24,4 +24,10 @@ CREATE TABLE article (
 	update_date DATE,
 	authors_parsed TEXT
 );
+```
+Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para poder insertar todos los valores del csv a nuestra tabla:
+``` sql
+\copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 ```
