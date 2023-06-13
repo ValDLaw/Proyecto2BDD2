@@ -40,6 +40,14 @@
         </button>
       </div>
 
+      <div class="tiempo-ejecucion">
+          Tiempo de ejecución de la consulta: {{ tiempo_consulta }} segundos
+      </div>
+
+      <div class="pagination-buttons">
+        <button class="pagination-button" :class="{ disabled: currentPage === 1 }" @click="previousPage">Previous</button>
+        <button class="pagination-button" @click="nextPage">Next</button>
+      </div>
       
       <!-- Aquí se mostrará la tabla seleccionada -->
       <div v-if="tablaSeleccionada === 'tablaA'" class="tabla-container">
@@ -122,6 +130,8 @@ export default {
       activeButton: 'tablaA',
       tiempo_consulta: 0,
       topK: 5,
+      currentPage: 1,
+      itemsPerPage: 5,
       tableAHeaders: [
         { text: 'ID', value: 'id' },
         { text: 'Submitter', value: 'submitter' },
@@ -187,7 +197,10 @@ export default {
         })
         .then((response) => {
           console.log(response.data)
-          this.tableAResults = response.data.resultados;
+          const allResults = response.data.resultados;
+          const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+          const endIndex = startIndex + this.itemsPerPage;
+          this.tableAResults = allResults.slice(startIndex, endIndex);
           this.tiempo_consulta = response.data.tiempo_ejecucion;
         })
         .catch((error) => {
@@ -205,12 +218,27 @@ export default {
         })
         .then((response) => {
           console.log(response.data)
-          this.tableBResults = response.data.resultados;
+          const allResults = response.data.resultados;
+          const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+          const endIndex = startIndex + this.itemsPerPage;
+          this.tableBResults = allResults.slice(startIndex, endIndex);
           this.tiempo_consulta = response.data.tiempo_ejecucion;
         })
         .catch((error) => {
           console.error(error);
         });
+    },
+    nextPage() {
+      if (this.currentPage - 1 < this.topK/this.itemsPerPage) {
+        this.currentPage++;
+        this.search();
+      }
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.search();
+      }
     },
   },
 };
@@ -365,10 +393,44 @@ export default {
   margin: 0 10px;
 }
 
+.pagination-buttons {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: #4caf50;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  margin-right: 5px;
+}
+
+.pagination-button:hover {
+  background-color: #45a049;
+}
+
+.pagination-button.disabled {
+  background-color: #dddddd;
+  cursor: not-allowed;
+}
+
 .selection-button.active {
   background-color: #f70804;
   color: #fff;
 }
+
+.tiempo-ejecucion {
+        color: #333;
+        font-family: "Courier New";
+        font-weight: bold;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
 
 .tabla-container table {
   width: 100%;
