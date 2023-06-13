@@ -2,10 +2,10 @@
 
 ### Integrantes
 * Valeria Espinoza Tarazona - (202110109)
-* nombre
-* nombre
-* nombre
-* nombre
+* Enzo Camizán Vidal - (202110047)
+* Diego Guerra Chevarría - (202010137)
+* Valentín Quezada Amour - (202120570)
+* Sofía García Quintana - (202110567)
 
 ## Introducción
 
