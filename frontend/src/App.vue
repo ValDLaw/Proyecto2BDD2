@@ -3,9 +3,9 @@
 <template>
   <div class="scrollable-content">
     <div class="background-image"></div>
-    <header v-fadeout="{ scrollThreshold: 100 }">
-      <!-- Aquí va tu logo -->
-      <img src="./assets/arxiv_logo.png" alt="Logo" />
+    <header v-fadeout="{ scrollThreshold: 100 }" class="header-container">
+      <img src="./assets/arxiv_logo.png" alt="Logo" class="logo" />
+      <h1 class="typing-title">Open access-archive for +2.2M articles</h1>
     </header>
     <div class="search-container">
       <div class="search-input">
@@ -15,27 +15,74 @@
       </div>
     </div>
 
-    <div class="container">
+    <div id="scroll-target" class="container">
       <div class="button-container">
-        <button @click="seleccionarTabla('tablaA')" class="selection-button">Tabla A</button>
-        <button @click="seleccionarTabla('tablaB')" class="selection-button">Tabla B</button>
-        <button @click="seleccionarTabla('tablaC')" class="selection-button">Tabla C</button>
+        <button
+          :class="{ 'active': activeButton === 'tablaA' }"
+          @click="seleccionarTabla('tablaA')"
+          class="selection-button"
+        >
+          PostgreSQL
+        </button>
+        <button
+          :class="{ 'active': activeButton === 'tablaB' }"
+          @click="seleccionarTabla('tablaB')"
+          class="selection-button"
+        >
+          MongoDB
+        </button>
+        <button
+          :class="{ 'active': activeButton === 'tablaC' }"
+          @click="seleccionarTabla('tablaC')"
+          class="selection-button"
+        >
+          Self II
+        </button>
       </div>
+
       
       <!-- Aquí se mostrará la tabla seleccionada -->
       <div v-if="tablaSeleccionada === 'tablaA'" class="tabla-container">
-        <v-data-table
-          :headers="tableAHeaders"
-          :items="tableAResults"
-          class="elevation-1"
-        ></v-data-table>
+        <table>
+          <thead>
+            <tr>
+              <th v-for="header in tableAHeaders" :key="header.text">{{ header.text }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="result in tableAResults" :key="result[0]">
+              <td>{{ result[0] }}</td>
+              <td>{{ result[1] }}</td>
+              <td>{{ result[2] }}</td>
+              <td>{{ result[3] }}</td>
+              <td>{{ result[4] }}</td>
+              <td>{{ result[5] }}</td>
+              <td>{{ result[6] }}</td>
+              <td>{{ result[7] }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div v-if="tablaSeleccionada === 'tablaB'" class="tabla-container">
-        <v-data-table
-          :headers="tableBHeaders"
-          :items="tableBResults"
-          class="elevation-1"
-        ></v-data-table>
+        <table>
+          <thead>
+            <tr>
+              <th v-for="header in tableBHeaders" :key="header.text">{{ header.text }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="result in tableBResults" :key="result.value">
+              <td>{{ result._id }}</td>
+              <td>{{ result.submitter }}</td>
+              <td>{{ result.authors }}</td>
+              <td>{{ result.title }}</td>
+              <td>{{ result.categories }}</td>
+              <td>{{ result.abstract }}</td>
+              <td>{{ result.update_date }}</td>
+              <td>{{ result.authors_parsed }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -72,8 +119,8 @@ export default {
       isScrolled: false,
       searchTerm: '',
       tablaSeleccionada: 'tablaA',
-      topK: 5, // Valor predeterminado para el top K
-      // Headers de las tablas
+      activeButton: 'tablaA',
+      topK: 5,
       tableAHeaders: [
         { text: 'Value', value: 'value' },
         { text: 'Submitter', value: 'submitter' },
@@ -109,6 +156,8 @@ export default {
   methods: {
     seleccionarTabla(tabla) {
       this.tablaSeleccionada = tabla;
+      this.activeButton = tabla;
+      this.search();
     },
     handleScroll() {
       this.isScrolled = window.pageYOffset > 0;
@@ -119,6 +168,11 @@ export default {
         this.searchTableA();
       } else if (this.tablaSeleccionada === 'tablaB') {
         this.searchTableB();
+      }
+      const scrollElement = document.getElementById('scroll-target');
+  
+      if (scrollElement) {
+        scrollElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     },
 
@@ -131,18 +185,8 @@ export default {
           withCredentials: true, // Habilita CORS
         })
         .then((response) => {
-          print("hola")
+          console.log(response.data)
           this.tableAResults = response.data.resultados;
-          this.tableAResults = resultados.map((resultado) => ({
-            value: resultado.value,
-            submitter: resultado.submitter,
-            authors: resultado.authors,
-            title: resultado.title,
-            categories: resultado.categories,
-            abstract: resultado.abstract,
-            update_date: resultado.update_date,
-            authors_parsed: resultado.authors_parsed,
-          }));
         })
         .catch((error) => {
           console.error(error);
@@ -154,8 +198,11 @@ export default {
         .post('http://127.0.0.1:5001/consulta', {
           parametro: this.searchTerm,
           k: this.topK,
+        }, {
+          withCredentials: true, // Habilita CORS
         })
         .then((response) => {
+          console.log(response.data)
           this.tableBResults = response.data.resultados;
         })
         .catch((error) => {
@@ -174,13 +221,40 @@ export default {
   height: 100vh;
 }
 
-header {
-  transition: opacity 0.3s;
+.header-container {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-header img {
-  height: 100px; /* Ajusta la altura según tu logo */
+.logo {
+  height: 130px; /* Ajusta la altura según tu logo */
+  margin-bottom: 170px; /* Espacio entre el logo y el título */
 }
+
+#scroll-target {
+  scroll-behavior: slow;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.typing-title {
+  overflow: hidden;
+  font-family: "Courier New";
+  white-space: nowrap;
+  animation: typing 3s steps(40) 1s infinite;
+}
+
 
 .background-image {
   position: fixed;
@@ -190,7 +264,7 @@ header img {
   height: 100%;
   z-index: -1;
   background-image: url('./assets/cornell_university.avif');
-  opacity: 0.8;
+  opacity: 0.7;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -249,24 +323,26 @@ header img {
 .search-input button {
   padding: 8px 12px;
   font-size: 14px;
-  background-color: #007bff;
+  background-color: #a61d1b;
   color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 .container {
+  background-color: white;
+  margin-top: 1000px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: fit-content;
 }
 
 .button-container {
   display: flex;
   justify-content: center;
-  margin-top: 800px;
+  margin-top: 0px;
   width: 60%;
   height: fit-content;
   background-color: white;
@@ -278,7 +354,7 @@ header img {
 .selection-button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: #a61d1b;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -286,31 +362,38 @@ header img {
   margin: 0 10px;
 }
 
-.my-table {
+.selection-button.active {
+  background-color: #f70804;
+  color: #fff;
+}
+
+.tabla-container table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.my-table th,
-.my-table td {
+.tabla-container th,
+.tabla-container td {
   padding: 10px;
-  text-align: left;
+  text-align: center;
+  font-family: "Courier New";
   border-bottom: 1px solid #ccc;
 }
 
-.my-table th {
+.tabla-container th {
   background-color: #f2f2f2;
+  font-weight: bold;
+  text-align: center;
 }
 
-.my-table tbody tr:nth-child(even) {
+.tabla-container tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.my-table tbody tr:hover {
+.tabla-container tbody tr:hover {
   background-color: #e9e9e9;
 }
-.tabla-container {
-  background-color: white;
-  width: 100%;
-}
+
+
+
 </style>
