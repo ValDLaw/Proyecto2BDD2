@@ -14,11 +14,13 @@ def consulta():
     k = data['k']
 
     db = client['Proyecto2BDD2']  # Nombre de la base de datos en MongoDB
-    collection = db['article']  # Nombre de la colección en MongoDB
+    collection = db['articles']  # Nombre de la colección en MongoDB
 
     # Ejecutar la consulta en MongoDB y medir tiempos
     start_time = time.time()
-    resultado = collection.find({'submitter': parametro}).limit(k) # Consulta de prueba
+    resultado = collection.find(
+    { '$text': { '$search': parametro } },
+    { 'score': { '$meta': 'textScore' } }).sort([('score', { '$meta': 'textScore' })]).limit(k)
     end_time = time.time()
 
     # Convertir los resultados en una lista de diccionarios

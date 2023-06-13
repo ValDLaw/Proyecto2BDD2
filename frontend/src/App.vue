@@ -72,7 +72,7 @@
           </thead>
           <tbody>
             <tr v-for="result in tableBResults" :key="result.value">
-              <td>{{ result._id }}</td>
+              <td>{{ result.id }}</td>
               <td>{{ result.submitter }}</td>
               <td>{{ result.authors }}</td>
               <td>{{ result.title }}</td>
@@ -120,9 +120,10 @@ export default {
       searchTerm: '',
       tablaSeleccionada: 'tablaA',
       activeButton: 'tablaA',
+      tiempo_consulta: 0,
       topK: 5,
       tableAHeaders: [
-        { text: 'Value', value: 'value' },
+        { text: 'ID', value: 'id' },
         { text: 'Submitter', value: 'submitter' },
         { text: 'Authors', value: 'authors' },
         { text: 'Title', value: 'title' },
@@ -132,7 +133,7 @@ export default {
         { text: 'Authors Parsed', value: 'authors_parsed' },
       ],
       tableBHeaders: [
-        { text: 'Value', value: 'value' },
+        { text: 'ID', value: 'id' },
         { text: 'Submitter', value: 'submitter' },
         { text: 'Authors', value: 'authors' },
         { text: 'Title', value: 'title' },
@@ -187,6 +188,7 @@ export default {
         .then((response) => {
           console.log(response.data)
           this.tableAResults = response.data.resultados;
+          this.tiempo_consulta = response.data.tiempo_ejecucion;
         })
         .catch((error) => {
           console.error(error);
@@ -204,6 +206,7 @@ export default {
         .then((response) => {
           console.log(response.data)
           this.tableBResults = response.data.resultados;
+          this.tiempo_consulta = response.data.tiempo_ejecucion;
         })
         .catch((error) => {
           console.error(error);

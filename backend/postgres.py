@@ -20,11 +20,12 @@ def consulta():
     k = data['k']
 
     cursor = conn.cursor()
+    conn.rollback()
 
     # Ejecutar la consulta en PostgreSQL y medir el tiempo de ejecución
     start_time = time.time()
-    query = "SELECT * FROM article WHERE submitter = %s LIMIT %s"
-    cursor.execute(query, (parametro, k,))
+    query = "SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;"
+    cursor.execute(query, (parametro, k))
     resultados = cursor.fetchall()
     end_time = time.time()
 
