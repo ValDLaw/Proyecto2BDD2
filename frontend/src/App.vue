@@ -24,34 +24,27 @@
       
       <!-- Aquí se mostrará la tabla seleccionada -->
       <div v-if="tablaSeleccionada === 'tablaA'" class="tabla-container">
-        <table class="my-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Edad</th>
-              <th>País</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(persona, index) in listaPersonas" :key="index">
-              <td>{{ persona.nombre }}</td>
-              <td>{{ persona.edad }}</td>
-              <td>{{ persona.pais }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <v-data-table
+          :headers="tableAHeaders"
+          :items="tableAResults"
+          class="elevation-1"
+        ></v-data-table>
       </div>
       <div v-if="tablaSeleccionada === 'tablaB'" class="tabla-container">
-        <!-- Código HTML de la tabla B -->
-      </div>
-      <div v-if="tablaSeleccionada === 'tablaC'" class="tabla-container">
-        <!-- Código HTML de la tabla C -->
+        <v-data-table
+          :headers="tableBHeaders"
+          :items="tableBResults"
+          class="elevation-1"
+        ></v-data-table>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+import { assertExpressionStatement } from '@babel/types';
+
 export default {
   directives: {
     fadeout: {
@@ -80,17 +73,31 @@ export default {
       searchTerm: '',
       tablaSeleccionada: 'tablaA',
       topK: 5, // Valor predeterminado para el top K
-      listaPersonas: [
-        { nombre: "Juan", edad: 25, pais: "Argentina" },
-        { nombre: "María", edad: 30, pais: "España" },
-        { nombre: "Carlos", edad: 40, pais: "México" },
-        { nombre: "Juan", edad: 25, pais: "Argentina" },
-        { nombre: "María", edad: 30, pais: "España" },
-        { nombre: "Carlos", edad: 40, pais: "México" },
-        
+      // Headers de las tablas
+      tableAHeaders: [
+        { text: 'Value', value: 'value' },
+        { text: 'Submitter', value: 'submitter' },
+        { text: 'Authors', value: 'authors' },
+        { text: 'Title', value: 'title' },
+        { text: 'Categories', value: 'categories' },
+        { text: 'Abstract', value: 'abstract' },
+        { text: 'Update Date', value: 'update_date' },
+        { text: 'Authors Parsed', value: 'authors_parsed' },
       ],
-      searchResultsColumn1: [],
-      searchResultsColumn2: [],
+      tableBHeaders: [
+        { text: 'Value', value: 'value' },
+        { text: 'Submitter', value: 'submitter' },
+        { text: 'Authors', value: 'authors' },
+        { text: 'Title', value: 'title' },
+        { text: 'Categories', value: 'categories' },
+        { text: 'Abstract', value: 'abstract' },
+        { text: 'Update Date', value: 'update_date' },
+        { text: 'Authors Parsed', value: 'authors_parsed' },
+      ],
+
+      // Resultados de las consultas a las tablas
+      tableAResults: [],
+      tableBResults: [],
     };
   },
   mounted() {
@@ -100,36 +107,60 @@ export default {
     window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
-    search() {
-      const resultsColumn1 = [];
-      const resultsColumn2 = [];
-      const searchTerm = this.searchTerm.toLowerCase();
-      let count = 0;
-
-      // Lógica para coincidencias y distribución en columnas
-      for (const key in this.dictionary) {
-        if (key.includes(searchTerm)) {
-          if (count < this.topK) {
-            if (count % 2 === 0) {
-              resultsColumn1.push(this.dictionary[key]);
-            } else {
-              resultsColumn2.push(this.dictionary[key]);
-            }
-            count++;
-          } else {
-            break;
-          }
-        }
-      }
-
-      this.searchResultsColumn1 = resultsColumn1;
-      this.searchResultsColumn2 = resultsColumn2;
-    },
     seleccionarTabla(tabla) {
       this.tablaSeleccionada = tabla;
     },
     handleScroll() {
       this.isScrolled = window.pageYOffset > 0;
+    },
+    search() {
+      // Realizar la búsqueda según la tabla seleccionada
+      if (this.tablaSeleccionada === 'tablaA') {
+        this.searchTableA();
+      } else if (this.tablaSeleccionada === 'tablaB') {
+        this.searchTableB();
+      }
+    },
+
+    searchTableA() {
+      axios
+        .post('http://127.0.0.1:5002/consulta', {
+          parametro: this.searchTerm,
+          k: this.topK,
+        }, {
+          withCredentials: true, // Habilita CORS
+        })
+        .then((response) => {
+          print("hola")
+          this.tableAResults = response.data.resultados;
+          this.tableAResults = resultados.map((resultado) => ({
+            value: resultado.value,
+            submitter: resultado.submitter,
+            authors: resultado.authors,
+            title: resultado.title,
+            categories: resultado.categories,
+            abstract: resultado.abstract,
+            update_date: resultado.update_date,
+            authors_parsed: resultado.authors_parsed,
+          }));
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
+    searchTableB() {
+      axios
+        .post('http://127.0.0.1:5001/consulta', {
+          parametro: this.searchTerm,
+          k: this.topK,
+        })
+        .then((response) => {
+          this.tableBResults = response.data.resultados;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
 };
@@ -177,6 +208,7 @@ header img {
 }
 
 .logo-image {
+  justify-content: center;
   display: block;
   width: 100px;
   height: 100px;
