@@ -1,13 +1,29 @@
 # Proyecto 2
 
 ### Integrantes
-* Valeria Espinoza Tarazona - (202110109)
-* Enzo Camizán Vidal - (202110047)
-* Diego Guerra Chevarría - (202010137)
-* Valentín Quezada Amour - (202120570)
-* Sofía García Quintana - (202110567)
+* Valeria Espinoza Tarazona (202110109)
+* Enzo Camizán Vidal (202110047)
+* Diego Guerra Chevarría (202010137)
+* Valentín Quezada Amour (202120570)
+* Sofía García Quintana (202110567)
 
 ## Introducción
+### Descripción del dominio de datos
+
+## Backend
+### Construcción del índice invertido
+
+### Manejo de memoria secundaria
+
+### Ejecución óptima de consultas
+
+## Frontend
+### Diseño del índice con PostgreSQL/MongoDB
+
+### Análisis comparativo con su propia implementación
+
+### Screenshots de la GUI
+
 
 ## Database
 ### JSON to CSV
