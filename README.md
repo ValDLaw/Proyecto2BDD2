@@ -7,8 +7,23 @@
 * Valentín Quezada Amour (202120570)
 * Sofía García Quintana (202110567)
 
+# Proyecto 2
+
+### Integrantes
+* Valeria Espinoza Tarazona (202110109)
+* Enzo Camizán Vidal (202110047)
+* Diego Guerra Chevarría (202010137)
+* Valentín Quezada Amour (202120570)
+* Sofía García Quintana (202110567)
+
 ## Introducción
+La recuperación de información y lectura en documentos de texto consiste en un procedimiento con trasfondo algorítmico un tanto complejo y bastante interesante. Hoy en día, existe una amplia variedad de técnicas y algoritmos planteados para realizar búsquedas en archivos textuales, manteniendo una efectividad precisa y buscando la mayor eficiencia posible. A continuación, se experimentará con el método del índice invertido en la búsqueda de textos para el dataset de ArXiv, el servicio open source de distribución de archivos.
+
+### Objetivo del proyecto
+El presente proyecto está enfocado en la construcción óptima de un índice invertido para tareas de búsqueda y recuperación en documentos de texto. Consistirá en la implementación de un sistema backend-frontend, con código de lenguaje Python en el backend y una GUI intuitiva como frontend. El objetivo principal será comparar el desempeño computacional de nuestra implementación propia del índice invertido con el de los gestores de bases de datos PostgreSQL y MongoDB. Nuestra GUI será capaz entonces de mostrar resultados para los tres escenarios, y a partir de ello, analizaremos los tiempos de ejecución para determinar la eficiencia de nuestro índice invertido.
+
 ### Descripción del dominio de datos
+El dominio de datos escogido para este proyecto consiste en un conjunto de más de 1.7 millones de papers académicos almacenados en la base de datos de ArXiv. La gran mayoría de estos archivos están enfocados en las disciplinas de física, matemática, ingeniería, biología, ciencias de la computación, y entre otras áreas académicas. Cada entrada en este repositorio cuenta con el título de su artículo, el autor, las categorías que abarca, un corto resumen de su contenido y su fecha de actualización. Fue escogido debido a la consistencia y simpleza de los atributos seleccionados para cada fila, además de contar con una cantidad considerable de data para trabajar.
 
 ## Backend
 ### Construcción del índice invertido
@@ -51,16 +66,7 @@
 ### Ejecución óptima de consultas
 
 ## Frontend
-### Diseño del índice con PostgreSQL/MongoDB
-
-### Análisis comparativo con su propia implementación
-
-### Screenshots de la GUI
-
-
-## Database
-### JSON to CSV
-### PostgreSQL DB
+### Diseño del índice con PostgreSQL
 Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
 ``` sql
 CREATE TABLE article (
@@ -80,3 +86,19 @@ Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para 
 \copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 \copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 ```
+
+### Diseño del índice con MongoDB
+
+### Análisis comparativo con su propia implementación
+
+### Screenshots de la GUI
+https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/b1134a71-e7a8-48b8-ba64-49940f17bd8e
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
+
+
+## Database
+### JSON to CSV
+### PostgreSQL DB
+
