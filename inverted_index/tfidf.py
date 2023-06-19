@@ -18,9 +18,6 @@ def compute_tf(collection):
     
     total_tf = sorted(total_tf.items(), key= lambda tup: tup[1], reverse=True)
     return doc_tf, total_tf
-    
-    total_tf = sorted(total_tf.items(), key= lambda tup: tup[1], reverse=True)
-    return doc_tf, total_tf
 
 def compute_idf(term, idf_freq, term_freq, N):
     if term in idf_freq: #si ya existe para term
