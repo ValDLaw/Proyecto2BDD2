@@ -16,7 +16,7 @@ El presente proyecto está enfocado en la construcción óptima de un índice in
 ### Descripción del dominio de datos
 El dominio de datos escogido para este proyecto consiste en un conjunto de más de 1.7 millones de papers académicos almacenados en la base de datos de ArXiv. La gran mayoría de estos archivos están enfocados en las disciplinas de física, matemática, ingeniería, biología, ciencias de la computación, y entre otras áreas académicas. Cada entrada en este repositorio cuenta con el título de su artículo, el autor, las categorías que abarca, un corto resumen de su contenido y su fecha de actualización. Fue escogido debido a la consistencia y simpleza de los atributos seleccionados para cada fila, además de contar con una cantidad considerable de data para trabajar.
 
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/fc833bcc-546a-4be7-ad37-23da503dd9e2)
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/b0d83442-7283-4994-89da-de70a4df3a53)
 
 ## Backend
 ### Construcción del índice invertido
