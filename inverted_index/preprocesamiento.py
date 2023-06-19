@@ -1,7 +1,8 @@
 import nltk
+from nltk.tokenize import word_tokenize
 from nltk.stem.snowball import SnowballStemmer
 
-stemmer = SnowballStemmer('spanish')
+stemmer = SnowballStemmer('english')
 nltk.download('punkt')
 
 def tokenizar(texto):
@@ -13,17 +14,28 @@ def tokenizar(texto):
 def eliminarStopWords(tokenText):
     #elegir stopwords
     customSW = open('inverted_index/docs/stopwords.txt','r')
-    stoplist = customSW.read().splitlines()
+    palabras_stoplist = customSW.read().splitlines()
     customSW.close()
-    stoplist += [".", "?", "¿", "-", "!", ",", ":",";","«", "con", "»", ")", "(", "'", "```", "iii", "``"]    
+    stoplist = ["--", "\\", "^",">",'.',"@","=","$" , '?', '[', ']', '¿',"(",")", '-', '!',"<", '\'',',', ":","``","''", ";", "»", '(-)',"+","0","/","(", "«", "{", "}", "--"]
 
-    #reducir palabras
-    tokensLst = []
-    for token in tokenText:
-        if token not in stoplist: #filtrar por stopwords
-            tokensLst.append(stemmer.stem(token)) #stemming
+    palabras_stoplist += stoplist
+    #Reducir palabras
 
-    return tokensLst
+    #Sacamos lexema si no esta en stoplist
+    resultado = [stemmer.stem(token) for token in tokenText if ((token not in palabras_stoplist))]
+    
+    #La idea es eliminar todas esas palabras que son de Latex
+    lstTokens = []
+    for token in resultado:
+        bandera = False
+        for word in stoplist:
+            if word in token:
+                bandera = True
+                break
+        if bandera == False:
+            lstTokens.append(token)
+
+    return lstTokens
 
 def preprocesar_query(query):
     tokenText = tokenizar(query)
@@ -31,12 +43,12 @@ def preprocesar_query(query):
     return tokensLst
 
 def preprocesar_textos(textos):
-    textos_procesados = []
+    abstracts_procesados = []
     for file_name in textos:
         file = open("inverted_index/docs/"+file_name)
         texto = file.read().rstrip()
         tokenText = tokenizar(texto)
         tokensLst = eliminarStopWords(tokenText)
-        textos_procesados.append(tokensLst)
+        abstracts_procesados.append(tokensLst)
 
-    return textos_procesados
+    return abstracts_procesados
