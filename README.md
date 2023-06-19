@@ -1,13 +1,4 @@
-# Proyecto 2
-
-### Integrantes
-* Valeria Espinoza Tarazona (202110109)
-* Enzo Camizán Vidal (202110047)
-* Diego Guerra Chevarría (202010137)
-* Valentín Quezada Amour (202120570)
-* Sofía García Quintana (202110567)
-
-# Proyecto 2
+# Proyecto 2 - Bases de Datos II
 
 ### Integrantes
 * Valeria Espinoza Tarazona (202110109)
@@ -24,6 +15,8 @@ El presente proyecto está enfocado en la construcción óptima de un índice in
 
 ### Descripción del dominio de datos
 El dominio de datos escogido para este proyecto consiste en un conjunto de más de 1.7 millones de papers académicos almacenados en la base de datos de ArXiv. La gran mayoría de estos archivos están enfocados en las disciplinas de física, matemática, ingeniería, biología, ciencias de la computación, y entre otras áreas académicas. Cada entrada en este repositorio cuenta con el título de su artículo, el autor, las categorías que abarca, un corto resumen de su contenido y su fecha de actualización. Fue escogido debido a la consistencia y simpleza de los atributos seleccionados para cada fila, además de contar con una cantidad considerable de data para trabajar.
+
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/fc833bcc-546a-4be7-ad37-23da503dd9e2)
 
 ## Backend
 ### Construcción del índice invertido
@@ -92,7 +85,6 @@ Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para 
 ### Análisis comparativo con su propia implementación
 
 ### Screenshots de la GUI
-https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/b1134a71-e7a8-48b8-ba64-49940f17bd8e
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
