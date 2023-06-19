@@ -5,7 +5,7 @@
     <div class="background-image"></div>
     <header v-fadeout="{ scrollThreshold: 100 }" class="header-container">
       <img src="./assets/arxiv_logo.png" alt="Logo" class="logo" />
-      <h1 class="typing-title">Open access-archive for +2.2M articles</h1>
+      <h1 class="typing-title">Open-access archive for +2.2M articles</h1>
     </header>
     <div class="search-container">
       <div class="search-input">
