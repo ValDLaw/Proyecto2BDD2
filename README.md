@@ -97,16 +97,24 @@ Luego, construimos el índice invertido a partir de los pesos, en un archivo apa
 
 ### Manejo de memoria secundaria
 
-A continuación, se explicará la implementación del índice invertido a partir del método de **Single-pass in-memory indexing (SPIMI)**.
+A continuación, se explicará la implementación del índice invertido a partir del método de **Single-pass in-memory indexing (SPIMI)**. Este método consiste en la construcción de bloques a partir de los términos (y no específicamente sus índices), creando diccionarios para cada bloque y respetando el espacio limitado a cada bloque para la memoria secundaria, en la cual luego serán escritos los bloques y fusionados con la función **merge**.
 
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/955d4c14-fbdd-4659-95e2-45ed010c1074)
 
 ### Ejecución óptima de consultas
 
+Para realizar una consulta en nuestro buscador, se ingresará en lenguaje natural el tema que se requiere encontrar entre los archvios de la base de datos y la cantidad de documentos (top k) que el usuario desee que se le muestre. Se hará entonces un llamado a las funciones del backend tomando los atributos de la query como ```string```, y el valor de k como ```int```.
 
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/87ae1bd6-a652-4876-9a9c-77db46021e17)
+
+Al ejecutar la consulta, se seguirán las siguientes pasos, independientemente del índice aplicado:
+- Se realiza un preprocesamiento interno de la query, pues pasa por un proceso de stemming para reducir cada palabra a su raiz.
+- Se calculan el tf_idf y la norma de la query.
+- Se calculan el tf_idf y la norma de los documentos relacionados a los términos del query.
+- Se determinan los scores basado en los cálculos anteriores y usando el método de la similitud de coseno.
+- Se genera una lista ordenada de los k elementos que se aproximan a la consulta y se retorna al usuario en el frontend.
 
 ## Frontend
-
 ### Carga e indexación de documentos
 
 ### Búsqueda textual
@@ -114,7 +122,8 @@ A continuación, se explicará la implementación del índice invertido a partir
 ### Presentación de resultados
 
 ### Diseño del índice con PostgreSQL
-Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
+Para la implementación del índice con PostgreSQL, se siguió esta serie de pasos:
+- Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
 ``` sql
 CREATE TABLE article (
 	id VARCHAR(255) PRIMARY KEY,
@@ -127,20 +136,20 @@ CREATE TABLE article (
 	authors_parsed TEXT
 );
 ```
-Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para poder insertar todos los valores del csv a nuestra tabla:
+- Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para poder insertar todos los valores del csv a nuestra tabla:
 ``` sql
 \copy article FROM '.../dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 \copy article FROM '.../dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 \copy article FROM '.../dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 ```  
 
-Luego, añadimos la columna vectorized_content y la llenamos de la siguiente manera:  
+- Luego, añadimos la columna vectorized_content y la llenamos de la siguiente manera:  
 ``` sql
 ALTER TABLE article ADD COLUMN vectorized_content TSVECTOR;
 UPDATE article SET vectorized_content = setweight(to_tsvector('english', title), 'A') || setweight(to_tsvector('english', abstract), 'B') || setweight(to_tsvector('english', authors), 'C');
 ```
 
-Creamos el archivo *postgres.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
+- Creamos el archivo *postgres.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
 
 ``` python
 @app.route('/consulta', methods=['POST'])
@@ -178,12 +187,13 @@ def consulta():
  ```  
 
 ### Diseño del índice con MongoDB  
-Importamos los datos del archivo 'arxiv-metadata-oai-snapshot.json' a nuestra Database en MongoDB usando la herramiento Import de MongoDB Compass. Luego, creamos una colección llamada **articles**.  
+Para la implementación del índice con MongoDB, se siguió esta serie de pasos:
+- Importamos los datos del archivo 'arxiv-metadata-oai-snapshot.json' a nuestra Database en MongoDB usando la herramiento Import de MongoDB Compass. Luego, creamos una colección llamada **articles**.  
 ![Articles](images/mongodb_articles.png)  
 
-Luego, creamos el índice compuesto en nuestra colección, utilizando los campos *title*, *abstract* y *authors*.    
+- Luego, creamos el índice compuesto en nuestra colección, utilizando los campos *title*, *abstract* y *authors*.    
 
-Creamos el archivo *mongodb.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.   
+- Creamos el archivo *mongodb.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.   
 
  ``` python
 @app.route('/consulta', methods=['POST'])
@@ -216,8 +226,7 @@ def consulta():
     }
  ```  
 
-  Notamos que la query empleada fue la siguiente:  
-
+Notamos que la query empleada fue la siguiente:  
  ``` c++
 resultado = collection.find(
     { '$text': { '$search': parametro } },
