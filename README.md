@@ -58,16 +58,15 @@ El dominio de datos escogido para este proyecto consiste en un conjunto de más 
 
 ### Ejecución óptima de consultas
 
-## Frontend
 ### Diseño del índice con PostgreSQL
 Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
 ``` sql
 CREATE TABLE article (
-	id FLOAT PRIMARY KEY,
-	submitter VARCHAR(40),
-	authors VARCHAR(80),
-	title VARCHAR(200),
-	categories VARCHAR(30),
+	id VARCHAR(255) PRIMARY KEY,
+	submitter TEXT,
+	authors TEXT,
+	title TEXT,
+	categories TEXT,
 	abstract TEXT,
 	update_date DATE,
 	authors_parsed TEXT
@@ -78,17 +77,61 @@ Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para 
 \copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 \copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 \copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+```  
+
+Luego, añadimos la columna vectorized_content y la llenamos de la siguiente manera:  
+``` sql
+ALTER TABLE article ADD COLUMN vectorized_content TSVECTOR;
+UPDATE article SET vectorized_content = setweight(to_tsvector('english', title), 'A') || setweight(to_tsvector('english', abstract), 'B') || setweight(to_tsvector('english', authors), 'C');
 ```
+
+Creamos la api llamada *postgres.py* con una única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
+
+``` python
+@app.route('/consulta', methods=['POST'])
+def consulta():
+    data = request.get_json()
+    parametro = data['parametro']
+    k = data['k']
+
+    cursor = conn.cursor()
+    conn.rollback()
+
+    # Ejecutar la consulta en PostgreSQL y medir el tiempo de ejecución
+    start_time = time.time()
+    query = "SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;"
+    cursor.execute(query, (parametro, k))
+    resultados = cursor.fetchall()
+    end_time = time.time()
+
+    tiempo_ejecucion = end_time - start_time
+
+    cursor.close()
+    print(resultados)
+
+    response = {
+        'resultados': resultados,
+        'tiempo_ejecucion': tiempo_ejecucion
+    }
+
+    return jsonify(response)
+```  
+ Notamos que la query empleada fue la siguiente:  
+
+ ``` sql
+ SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;
+ ```  
 
 ### Diseño del índice con MongoDB
 
-### Análisis comparativo con su propia implementación
+## Frontend
 
 ### Screenshots de la GUI
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
 
+### Análisis comparativo con su propia implementación
 
 ## Database
 ### JSON to CSV
