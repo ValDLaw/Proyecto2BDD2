@@ -14,12 +14,47 @@ La recuperación de información y lectura en documentos de texto consiste en un
 El presente proyecto está enfocado en la construcción óptima de un índice invertido para tareas de búsqueda y recuperación en documentos de texto. Consistirá en la implementación de un sistema backend-frontend, con código de lenguaje Python en el backend y una GUI intuitiva como frontend. El objetivo principal será comparar el desempeño computacional de nuestra implementación propia del índice invertido con el de los gestores de bases de datos PostgreSQL y MongoDB. Nuestra GUI será capaz entonces de mostrar resultados para los tres escenarios, y a partir de ello, analizaremos los tiempos de ejecución para determinar la eficiencia de nuestro índice invertido.
 
 ### Descripción del dominio de datos
-El dominio de datos escogido para este proyecto consiste en un conjunto de más de 1.7 millones de papers académicos almacenados en la base de datos de ArXiv. La gran mayoría de estos archivos están enfocados en las disciplinas de física, matemática, ingeniería, biología, ciencias de la computación, y entre otras áreas académicas. Cada entrada en este repositorio cuenta con el título de su artículo, el autor, las categorías que abarca, un corto resumen de su contenido y su fecha de actualización. Fue escogido debido a la consistencia y simpleza de los atributos seleccionados para cada fila, además de contar con una cantidad considerable de data para trabajar.
+El dominio de datos escogido para este proyecto consiste en un conjunto de más de 2.2 millones de papers académicos almacenados en la base de datos de ArXiv (https://www.kaggle.com/datasets/Cornell-University/arxiv). La gran mayoría de estos archivos están enfocados en las disciplinas de física, matemática, ingeniería, biología, ciencias de la computación, y entre otras áreas académicas. Cada entrada en este repositorio cuenta con el título de su artículo, el autor, las categorías que abarca, un corto resumen de su contenido y su fecha de actualización. Fue escogido debido a la consistencia y simpleza de los atributos seleccionados para cada fila, además de contar con una cantidad considerable de data para trabajar.
 
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/b0d83442-7283-4994-89da-de70a4df3a53)
 
+
 ## Backend
-### Construcción del índice invertido
+
+### JSON to CSV
+Por temas de facilidad en el manejo de la data, dividimos el archivo json recuperado de ArXiv en 3 archivos csv, ejecutado en las siguientes líneas de código: 
+
+``` python
+df = []
+# Modificar ubicación
+with open("/Users/ValDLaw/Desktop/arxiv-metadata-oai-snapshot.json", "r") as f:
+    #print("abierto")
+    for line in f:
+        data = json.loads(line)
+        df.append(data)
+        #print(data)
+
+df = pd.DataFrame(df)
+df = df.drop(columns=["doi", "journal-ref", "comments", "license", "report-no", "versions"])
+df = df.replace('\n', ' ', regex=True)
+
+# Modificar ubicación
+df.to_csv("/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv", header=True, index=False)
+
+# Modificar ubicación
+csv_file = '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv'
+num_files = 3
+df = pd.read_csv(csv_file)
+rows_per_file = len(df) // num_files
+split_dfs = [df[i*rows_per_file:(i+1)*rows_per_file] for i in range(num_files)]
+
+for i, split_df in enumerate(split_dfs):
+    split_df.to_csv(f'arxiv-metadata-{i+1}.csv', index=False, header=None, sep=',')
+ ``` 
+
+### Preprocesamiento
+
+El preprocesamiento de la data se realizó en un archivo aparte, llamado ```preprocesamiento.py```. Los procesos realizados fueron la tokenización del texto, el filtrado de las stopwords y caracteres especiales y la reducción de palabras con el método de stemming.
 
 **preprocesamiento.py**
 
@@ -31,6 +66,8 @@ El dominio de datos escogido para este proyecto consiste en un conjunto de más 
 `preprocesar_query(query)`: toma una consulta de texto como entrada y la procesa utilizando `tokenizar` y `eliminarStopWords`. Devuelve una lista de tokens procesados.
 
 `preprocesar_textos(textos)`: es de forma muy similar a `preprocesar_query`.
+
+### Construcción del índice invertido
 
 **tfidf.py**
 
@@ -56,7 +93,20 @@ El dominio de datos escogido para este proyecto consiste en un conjunto de más 
 
 ### Manejo de memoria secundaria
 
+
+
 ### Ejecución óptima de consultas
+
+
+
+## Frontend
+
+### Carga e indexación de documentos
+
+### Búsqueda textual
+
+### Presentación de resultados
+## Frontend
 
 ### Diseño del índice con PostgreSQL
 Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
@@ -169,52 +219,10 @@ resultado = collection.find(
     { 'score': { '$meta': 'textScore' } }).sort([('score', { '$meta': 'textScore' })]).limit(k)
  ```  
 
-## Frontend
-
-### Screenshots de la GUI
-Se creo un proyecto en Vue para la búsqueda textual. En la página principal, se le pide al usuario ingresar su consulta textual y un entero k que es la cantidad de artículos que se devolverán.  
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)  
-
-Al presionar el botón *search*, se devuelve el top k de artíulos más relacionados. Asimismo, se le ofrece al usuario 3 formas de obtener este resultado: PostgreSQL, MongoDB o con un Self Inverted Index, el cual usa el método de SPIMI. El siguiente resultado es usando la base de datos de PostgreSQL:  
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
-
-En segundo lugar, tenemos los resultados con MongoDB:  
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
-
-Finalmente, los artículos más relacionados usando el indíce invertido de código propio.  
-
 ### Análisis comparativo con su propia implementación
 
-## Dataset
-El Dataset empleado para el proyecto fue el arXiv Dataset, obtenido del siguiente enlace: https://www.kaggle.com/datasets/Cornell-University/arxiv, el cual tiene la información de un total de 2272690 artículos escolares.  
+### Screenshots de la GUI
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
 
-### JSON to CSV
-Por temas de facilidad de manejo de la data, dividimos dicho archivo json en 3 archivos csv, usando las siguientes líneas de código.  
-
-``` python
-df = []
-# Modificar ubicacion
-with open("/Users/ValDLaw/Desktop/arxiv-metadata-oai-snapshot.json", "r") as f:
-    #print("abierto")
-    for line in f:
-        data = json.loads(line)
-        df.append(data)
-        #print(data)
-
-df = pd.DataFrame(df)
-df = df.drop(columns=["doi", "journal-ref", "comments", "license", "report-no", "versions"])
-df = df.replace('\n', ' ', regex=True)
-
-# Modificar ubicacion
-df.to_csv("/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv", header=True, index=False)
-
-# Modificar ubicacion
-csv_file = '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv'
-num_files = 3
-df = pd.read_csv(csv_file)
-rows_per_file = len(df) // num_files
-split_dfs = [df[i*rows_per_file:(i+1)*rows_per_file] for i in range(num_files)]
-
-for i, split_df in enumerate(split_dfs):
-    split_df.to_csv(f'arxiv-metadata-{i+1}.csv', index=False, header=None, sep=',')
- ``` 
