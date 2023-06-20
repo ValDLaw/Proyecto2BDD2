@@ -85,6 +85,12 @@ ALTER TABLE article ADD COLUMN vectorized_content TSVECTOR;
 UPDATE article SET vectorized_content = setweight(to_tsvector('english', title), 'A') || setweight(to_tsvector('english', abstract), 'B') || setweight(to_tsvector('english', authors), 'C');
 ```
 
+Creamos un índice GIN en la columna :  
+
+``` sql
+CREATE INDEX indexado_gin_index ON ARTICLE USING GIN(vectorized_content);
+```  
+
 Creamos el archivo *postgres.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
 
 ``` python
@@ -183,6 +189,21 @@ En segundo lugar, tenemos los resultados con MongoDB:
 
 Finalmente, los artículos más relacionados usando el indíce invertido de código propio.  
 
+### Explicación de resultados  
+A continuación, explicaremos cada una de las técnicas empleadas y el porqué del tiempo de ejecución.  
+
+## PostgreSQL  
+El índice GIN (Generalized Inverted Index) en PostgreSQL es un tipo de índice utilizado para realizar búsquedas eficientes en campos que contienen múltiples valores o estructuras de datos complejas. A diferencia de los índices B-tree convencionales, el índice GIN es especialmente útil para columnas que almacenan arreglos, tipos de datos JSON, texto y otros tipos de datos no escalares.  
+
+La importancia de usar el índice GIN en ente proyecto radica en su capacidad para indexar y buscar eficientemente los valores en campos como `title`, `abstract` y `authors`. El índice GIN permite una búsqueda más rápida y eficiente en estos campos, lo que es crucial cuando necesitamos realizar consultas que involucran similitud de cadenas y recuperar el top K de resultados más similares.  
+
+## MongoDB  
+Por otro lado, MongoDB utiliza un enfoque diferente para la indexación y búsqueda de texto. En MongoDB, se utiliza un índice de texto y el operador `$text` para realizar búsquedas de texto. El índice de texto en MongoDB puede proporcionar funcionalidades similares al índice GIN en PostgreSQL para realizar búsquedas basadas en la similitud de texto.  
+
+En términos de rendimiento y velocidad, MongoDB puede ofrecer ciertas ventajas debido a su arquitectura y características específicas. MongoDB utiliza un modelo de almacenamiento orientado a documentos y puede escalar horizontalmente para manejar grandes volúmenes de datos y cargas de trabajo intensivas. Además, MongoDB está diseñado para tener un rendimiento rápido en consultas de texto mediante el uso de índices de texto y algoritmos de búsqueda eficientes.  
+
+Sin embargo, la eficacia y la velocidad de las consultas pueden depender de varios factores, como el tamaño de los datos por cada artículo, la estructura de la consulta, la configuración del hardware y otros aspectos específicos del caso de uso del proyecto. Es importante tener en cuenta que tanto PostgreSQL como MongoDB ofrecen opciones y características adicionales para optimizar el rendimiento de las consultas, como la optimización de consultas, el ajuste de índices y la configuración adecuada del entorno de base de datos.   
+
 ### Análisis comparativo con su propia implementación
 
 ## Dataset
@@ -194,7 +215,7 @@ Por temas de facilidad de manejo de la data, dividimos dicho archivo json en 3 a
 ``` python
 df = []
 # Modificar ubicacion
-with open("/Users/ValDLaw/Desktop/arxiv-metadata-oai-snapshot.json", "r") as f:
+with open(".../arxiv-metadata-oai-snapshot.json", "r") as f:
     #print("abierto")
     for line in f:
         data = json.loads(line)
@@ -206,10 +227,10 @@ df = df.drop(columns=["doi", "journal-ref", "comments", "license", "report-no", 
 df = df.replace('\n', ' ', regex=True)
 
 # Modificar ubicacion
-df.to_csv("/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv", header=True, index=False)
+df.to_csv(".../dataset/arxiv-metadata.csv", header=True, index=False)
 
 # Modificar ubicacion
-csv_file = '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv'
+csv_file = '.../dataset/arxiv-metadata.csv'
 num_files = 3
 df = pd.read_csv(csv_file)
 rows_per_file = len(df) // num_files
