@@ -20,9 +20,10 @@ El dominio de datos escogido para este proyecto consiste en un conjunto de más 
 
 
 ## Backend
+El backend se desarrolló en lenguaje de programación Python, se desarrollaron APIs y rutas para cada método de indexación (PostgreSQL, MongoDB e implementación propia) a partir de la base de datos proporcionada.
 
 ### JSON to CSV
-Por temas de facilidad en el manejo de la data, dividimos el archivo json recuperado de ArXiv en 3 archivos csv, ejecutado en las siguientes líneas de código: 
+Por temas de facilidad en el manejo de la data, dividimos el archivo json recuperado de ArXiv en 3 archivos csv, procedimiento ejecutado en las siguientes líneas de código: 
 
 ``` python
 df = []
@@ -53,8 +54,7 @@ for i, split_df in enumerate(split_dfs):
  ``` 
 
 ### Preprocesamiento
-
-El preprocesamiento de la data se realizó en un archivo aparte, llamado ```preprocesamiento.py```. Los procesos realizados fueron la tokenización del texto, el filtrado de las stopwords y caracteres especiales y la reducción de palabras con el método de stemming.
+El preprocesamiento de la data se realizó en un código aparte, llamado ```preprocesamiento.py```. Los procesos realizados fueron la tokenización del texto, el filtrado de las stopwords y caracteres especiales y la reducción de palabras con el método de stemming.
 
 **preprocesamiento.py**
 
@@ -97,26 +97,28 @@ Luego, construimos el índice invertido a partir de los pesos, en un archivo apa
 
 ### Manejo de memoria secundaria
 
-A continuación, se explicará la implementación del índice invertido a partir del método de **Single-pass in-memory indexing (SPIMI)**. Este método consiste en la construcción de bloques a partir de los términos (y no específicamente sus índices), creando diccionarios para cada bloque y respetando el espacio limitado a cada bloque para la memoria secundaria, en la cual luego serán escritos los bloques y fusionados con la función **merge**.
+A continuación, se explicará la implementación del índice invertido a partir del método de **Single-pass in-memory indexing (SPIMI)**. Este método consiste en la construcción de bloques a partir de los términos (y no específicamente sus índices), creando diccionarios para cada bloque y respetando el espacio limitado a cada uno para la memoria secundaria, en la cual luego serán escritos y fusionados con la función **merge**.
 
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/955d4c14-fbdd-4659-95e2-45ed010c1074)
 
 ### Ejecución óptima de consultas
 
-Para realizar una consulta en nuestro buscador, se ingresará en lenguaje natural el tema que se requiere encontrar entre los archvios de la base de datos y la cantidad de documentos (top k) que el usuario desee que se le muestre. Se hará entonces un llamado a las funciones del backend tomando los atributos de la query como ```string```, y el valor de k como ```int```.
+Para realizar una consulta en nuestro buscador, se ingresará (en lenguaje natural) el tema deseado y la cantidad de documentos relacionados al tema (top k) que el usuario gustaría que se le muestre. Se hará entonces un llamado a las funciones del backend tomando los atributos de la query como ```string```, y el valor de k como ```int```.
 
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/87ae1bd6-a652-4876-9a9c-77db46021e17)
 
 Al ejecutar la consulta, se seguirán las siguientes pasos, independientemente del índice aplicado:
 - Se realiza un preprocesamiento interno de la query, pues pasa por un proceso de stemming para reducir cada palabra a su raiz.
-- Se calculan el tf_idf y la norma de la query.
-- Se calculan el tf_idf y la norma de los documentos relacionados a los términos del query.
+- Se calculan el peso tf_idf y la norma de la query.
+- Se calculan el peso tf_idf y la norma de los documentos relacionados a los términos del query.
 - Se determinan los scores basado en los cálculos anteriores y usando el método de la similitud de coseno.
-- Se genera una lista ordenada de los k elementos que se aproximan a la consulta y se retorna al usuario en el frontend.
+- Se genera una lista ordenada de los top k elementos que se aproximan a la consulta y se retorna al usuario en el frontend.
 
 ## Frontend
+Para el frontend, se utilizó el lenguaje de programación JavaScript junto con el framework de Vue. Al desarrollar la GUI, se intentó hacer de forma que fuese intuitiva para el usuario, insertando consultas con facilidad y proporcionando los botones respectivos para la elección del índice de búsqueda (PostgreSQL, MongoDB o implementación propia).
+
 ### Carga e indexación de documentos  
-- Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:  
+- Instauramos una base de datos con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:  
 ``` sql
 CREATE TABLE article (
 	id VARCHAR(255) PRIMARY KEY,
@@ -130,15 +132,15 @@ CREATE TABLE article (
 );
 ```
 
-- Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para poder insertar todos los valores del csv a nuestra tabla:  
+- Nos conectamos a nuestra Database desde el terminal y ejecutamos los siguientes comandos para poder insertar todos los valores del csv a nuestra tabla:  
 ``` sql
-\copy article FROM '.../dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
-\copy article FROM '.../dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
-\copy article FROM '.../dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '../dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '../dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '../dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 ```  
 
-### Búsqueda textual  
-- Creamos el archivo *postgres.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
+### Búsqueda textual 
+- Creamos el archivo *postgres.py* con una API de ruta única '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
 
 ``` python
 @app.route('/consulta', methods=['POST'])
@@ -170,8 +172,7 @@ def consulta():
     return jsonify(response)
 ```  
 
-- Igualmente, creamos el archivo *mongodb.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.   
-
+- A la vez, creamos el archivo *mongodb.py* con una API de ruta única '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.   
  ``` python
 @app.route('/consulta', methods=['POST'])
 def consulta():
@@ -202,19 +203,18 @@ def consulta():
         'tiempo_ejecucion': tiempo_ejecucion
     }
  ```  
-
-### Presentación de resultados
+(!)
 
 ### Diseño del índice con PostgreSQL
 Para la implementación del índice con PostgreSQL, se siguió esta serie de pasos:
 
-- Luego, añadimos la columna vectorized_content y la llenamos de la siguiente manera:  
+Añadimos la columna ```vectorized_content``` y la llenamos de la siguiente manera:  
 ``` sql
 ALTER TABLE article ADD COLUMN vectorized_content TSVECTOR;
 UPDATE article SET vectorized_content = setweight(to_tsvector('english', title), 'A') || setweight(to_tsvector('english', abstract), 'B') || setweight(to_tsvector('english', authors), 'C');
 ```
 
-Creamos un índice GIN en la columna :  
+Creamos un índice GIN en la columna:  
 
 ``` sql
 CREATE INDEX indexado_gin_index ON ARTICLE USING GIN(vectorized_content);
@@ -228,10 +228,10 @@ SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s)
 
 ### Diseño del índice con MongoDB  
 Para la implementación del índice con MongoDB, se siguió esta serie de pasos:
-- Importamos los datos del archivo 'arxiv-metadata-oai-snapshot.json' a nuestra Database en MongoDB usando la herramiento Import de MongoDB Compass. Luego, creamos una colección llamada **articles**.  
+Importamos los datos del archivo 'arxiv-metadata-oai-snapshot.json' a nuestra Database en MongoDB usando la herramiento Import de MongoDB Compass. Luego, creamos una colección llamada **articles**.  
 ![Articles](images/mongodb_articles.png)  
 
-- Luego, creamos el índice compuesto en nuestra colección, utilizando los campos *title*, *abstract* y *authors*.    
+Luego, creamos el índice compuesto en nuestra colección, utilizando los campos *title*, *abstract* y *authors*.    
 
 Notamos que la query empleada fue la siguiente:  
  ``` c++
@@ -240,24 +240,33 @@ resultado = collection.find(
     { 'score': { '$meta': 'textScore' } }).sort([('score', { '$meta': 'textScore' })]).limit(k)
  ```  
 
+### Diseño del índice invertido por implementación propia
+
+
+### Presentación de resultados
+
+
 ### Screenshots de la GUI
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
 
-### Explicación de resultados  
-A continuación, explicaremos cada una de las técnicas empleadas y el porqué del tiempo de ejecución.  
+## Análisis de resultados  
+A continuación, explicaremos cada una de las técnicas empleadas y el porqué del tiempo de ejecución en cada caso.
 
-## PostgreSQL  
+### PostgreSQL  
 El índice GIN (Generalized Inverted Index) en PostgreSQL es un tipo de índice utilizado para realizar búsquedas eficientes en campos que contienen múltiples valores o estructuras de datos complejas. A diferencia de los índices B-tree convencionales, el índice GIN es especialmente útil para columnas que almacenan arreglos, tipos de datos JSON, texto y otros tipos de datos no escalares.  
 
 La importancia de usar el índice GIN en ente proyecto radica en su capacidad para indexar y buscar eficientemente los valores en campos como `title`, `abstract` y `authors`. El índice GIN permite una búsqueda más rápida y eficiente en estos campos, lo que es crucial cuando necesitamos realizar consultas que involucran similitud de cadenas y recuperar el top K de resultados más similares.  
 
-## MongoDB  
+### MongoDB  
 Por otro lado, MongoDB utiliza un enfoque diferente para la indexación y búsqueda de texto. En MongoDB, se utiliza un índice de texto y el operador `$text` para realizar búsquedas de texto. El índice de texto en MongoDB puede proporcionar funcionalidades similares al índice GIN en PostgreSQL para realizar búsquedas basadas en la similitud de texto.  
 
-En términos de rendimiento y velocidad, MongoDB puede ofrecer ciertas ventajas debido a su arquitectura y características específicas. MongoDB utiliza un modelo de almacenamiento orientado a documentos y puede escalar horizontalmente para manejar grandes volúmenes de datos y cargas de trabajo intensivas. Además, MongoDB está diseñado para tener un rendimiento rápido en consultas de texto mediante el uso de índices de texto y algoritmos de búsqueda eficientes.  
+En términos de rendimiento y velocidad, MongoDB puede ofrecer ciertas ventajas debido a su arquitectura y características específicas. MongoDB utiliza un modelo de almacenamiento orientado a documentos y puede escalar horizontalmente para manejar grandes volúmenes de datos y cargas de trabajo intensivas. Además, MongoDB está diseñado para tener un rendimiento rápido en consultas de texto mediante el uso de índices de texto y algoritmos de búsqueda eficientes. 
 
 Sin embargo, la eficacia y la velocidad de las consultas pueden depender de varios factores, como el tamaño de los datos por cada artículo, la estructura de la consulta, la configuración del hardware y otros aspectos específicos del caso de uso del proyecto. Es importante tener en cuenta que tanto PostgreSQL como MongoDB ofrecen opciones y características adicionales para optimizar el rendimiento de las consultas, como la optimización de consultas, el ajuste de índices y la configuración adecuada del entorno de base de datos.   
 
-### Análisis comparativo con nuestra propia implementación
+### Implementación propia
+
+## Conclusiones
+
