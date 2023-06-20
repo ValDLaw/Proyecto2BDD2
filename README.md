@@ -99,7 +99,7 @@ Luego, construimos el índice invertido a partir de los pesos, en un archivo apa
 
 A continuación, se explicará la implementación del índice invertido a partir del método de **Single-pass in-memory indexing (SPIMI)**.
 
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/ae4e3529-be83-4880-a28a-0b28cc8ae779)
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/955d4c14-fbdd-4659-95e2-45ed010c1074)
 
 ### Ejecución óptima de consultas
 
