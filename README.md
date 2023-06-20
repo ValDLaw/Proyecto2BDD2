@@ -172,13 +172,49 @@ resultado = collection.find(
 ## Frontend
 
 ### Screenshots de la GUI
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
+Se creo un proyecto en Vue para la búsqueda textual. En la página principal, se le pide al usuario ingresar su consulta textual y un entero k que es la cantidad de artículos que se devolverán.  
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)  
+
+Al presionar el botón *search*, se devuelve el top k de artíulos más relacionados. Asimismo, se le ofrece al usuario 3 formas de obtener este resultado: PostgreSQL, MongoDB o con un Self Inverted Index, el cual usa el método de SPIMI. El siguiente resultado es usando la base de datos de PostgreSQL:  
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
+
+En segundo lugar, tenemos los resultados con MongoDB:  
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
+
+Finalmente, los artículos más relacionados usando el indíce invertido de código propio.  
 
 ### Análisis comparativo con su propia implementación
 
-## Database
-### JSON to CSV
-### PostgreSQL DB
+## Dataset
+El Dataset empleado para el proyecto fue el arXiv Dataset, obtenido del siguiente enlace: https://www.kaggle.com/datasets/Cornell-University/arxiv, el cual tiene la información de un total de 2272690 artículos escolares.  
 
+### JSON to CSV
+Por temas de facilidad de manejo de la data, dividimos dicho archivo json en 3 archivos csv, usando las siguientes líneas de código.  
+
+``` python
+df = []
+# Modificar ubicacion
+with open("/Users/ValDLaw/Desktop/arxiv-metadata-oai-snapshot.json", "r") as f:
+    #print("abierto")
+    for line in f:
+        data = json.loads(line)
+        df.append(data)
+        #print(data)
+
+df = pd.DataFrame(df)
+df = df.drop(columns=["doi", "journal-ref", "comments", "license", "report-no", "versions"])
+df = df.replace('\n', ' ', regex=True)
+
+# Modificar ubicacion
+df.to_csv("/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv", header=True, index=False)
+
+# Modificar ubicacion
+csv_file = '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata.csv'
+num_files = 3
+df = pd.read_csv(csv_file)
+rows_per_file = len(df) // num_files
+split_dfs = [df[i*rows_per_file:(i+1)*rows_per_file] for i in range(num_files)]
+
+for i, split_df in enumerate(split_dfs):
+    split_df.to_csv(f'arxiv-metadata-{i+1}.csv', index=False, header=None, sep=',')
+ ``` 
