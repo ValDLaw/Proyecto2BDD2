@@ -115,15 +115,8 @@ Al ejecutar la consulta, se seguirán las siguientes pasos, independientemente d
 - Se genera una lista ordenada de los k elementos que se aproximan a la consulta y se retorna al usuario en el frontend.
 
 ## Frontend
-### Carga e indexación de documentos
-
-### Búsqueda textual
-
-### Presentación de resultados
-
-### Diseño del índice con PostgreSQL
-Para la implementación del índice con PostgreSQL, se siguió esta serie de pasos:
-- Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
+### Carga e indexación de documentos  
+- Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:  
 ``` sql
 CREATE TABLE article (
 	id VARCHAR(255) PRIMARY KEY,
@@ -136,25 +129,15 @@ CREATE TABLE article (
 	authors_parsed TEXT
 );
 ```
-- Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para poder insertar todos los valores del csv a nuestra tabla:
+
+- Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para poder insertar todos los valores del csv a nuestra tabla:  
 ``` sql
 \copy article FROM '.../dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 \copy article FROM '.../dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 \copy article FROM '.../dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 ```  
 
-- Luego, añadimos la columna vectorized_content y la llenamos de la siguiente manera:  
-``` sql
-ALTER TABLE article ADD COLUMN vectorized_content TSVECTOR;
-UPDATE article SET vectorized_content = setweight(to_tsvector('english', title), 'A') || setweight(to_tsvector('english', abstract), 'B') || setweight(to_tsvector('english', authors), 'C');
-```
-
-Creamos un índice GIN en la columna :  
-
-``` sql
-CREATE INDEX indexado_gin_index ON ARTICLE USING GIN(vectorized_content);
-```  
-
+### Búsqueda textual  
 - Creamos el archivo *postgres.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
 
 ``` python
@@ -186,20 +169,8 @@ def consulta():
 
     return jsonify(response)
 ```  
- Notamos que la query empleada fue la siguiente:  
 
- ``` sql
- SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;
- ```  
-
-### Diseño del índice con MongoDB  
-Para la implementación del índice con MongoDB, se siguió esta serie de pasos:
-- Importamos los datos del archivo 'arxiv-metadata-oai-snapshot.json' a nuestra Database en MongoDB usando la herramiento Import de MongoDB Compass. Luego, creamos una colección llamada **articles**.  
-![Articles](images/mongodb_articles.png)  
-
-- Luego, creamos el índice compuesto en nuestra colección, utilizando los campos *title*, *abstract* y *authors*.    
-
-- Creamos el archivo *mongodb.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.   
+- Igualmente, creamos el archivo *mongodb.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.   
 
  ``` python
 @app.route('/consulta', methods=['POST'])
@@ -232,6 +203,36 @@ def consulta():
     }
  ```  
 
+### Presentación de resultados
+
+### Diseño del índice con PostgreSQL
+Para la implementación del índice con PostgreSQL, se siguió esta serie de pasos:
+
+- Luego, añadimos la columna vectorized_content y la llenamos de la siguiente manera:  
+``` sql
+ALTER TABLE article ADD COLUMN vectorized_content TSVECTOR;
+UPDATE article SET vectorized_content = setweight(to_tsvector('english', title), 'A') || setweight(to_tsvector('english', abstract), 'B') || setweight(to_tsvector('english', authors), 'C');
+```
+
+Creamos un índice GIN en la columna :  
+
+``` sql
+CREATE INDEX indexado_gin_index ON ARTICLE USING GIN(vectorized_content);
+```  
+
+Notamos que la query empleada fue la siguiente:  
+
+``` sql
+SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;
+```  
+
+### Diseño del índice con MongoDB  
+Para la implementación del índice con MongoDB, se siguió esta serie de pasos:
+- Importamos los datos del archivo 'arxiv-metadata-oai-snapshot.json' a nuestra Database en MongoDB usando la herramiento Import de MongoDB Compass. Luego, creamos una colección llamada **articles**.  
+![Articles](images/mongodb_articles.png)  
+
+- Luego, creamos el índice compuesto en nuestra colección, utilizando los campos *title*, *abstract* y *authors*.    
+
 Notamos que la query empleada fue la siguiente:  
  ``` c++
 resultado = collection.find(
@@ -239,14 +240,10 @@ resultado = collection.find(
     { 'score': { '$meta': 'textScore' } }).sort([('score', { '$meta': 'textScore' })]).limit(k)
  ```  
 
-### Análisis comparativo con nuestra propia implementación
-
 ### Screenshots de la GUI
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
-
-Finalmente, los artículos más relacionados usando el indíce invertido de código propio.  
 
 ### Explicación de resultados  
 A continuación, explicaremos cada una de las técnicas empleadas y el porqué del tiempo de ejecución.  
@@ -263,38 +260,4 @@ En términos de rendimiento y velocidad, MongoDB puede ofrecer ciertas ventajas 
 
 Sin embargo, la eficacia y la velocidad de las consultas pueden depender de varios factores, como el tamaño de los datos por cada artículo, la estructura de la consulta, la configuración del hardware y otros aspectos específicos del caso de uso del proyecto. Es importante tener en cuenta que tanto PostgreSQL como MongoDB ofrecen opciones y características adicionales para optimizar el rendimiento de las consultas, como la optimización de consultas, el ajuste de índices y la configuración adecuada del entorno de base de datos.   
 
-### Análisis comparativo con su propia implementación
-
-## Dataset
-El Dataset empleado para el proyecto fue el arXiv Dataset, obtenido del siguiente enlace: https://www.kaggle.com/datasets/Cornell-University/arxiv, el cual tiene la información de un total de 2272690 artículos escolares.  
-
-### JSON to CSV
-Por temas de facilidad de manejo de la data, dividimos dicho archivo json en 3 archivos csv, usando las siguientes líneas de código.  
-
-``` python
-df = []
-# Modificar ubicacion
-with open(".../arxiv-metadata-oai-snapshot.json", "r") as f:
-    #print("abierto")
-    for line in f:
-        data = json.loads(line)
-        df.append(data)
-        #print(data)
-
-df = pd.DataFrame(df)
-df = df.drop(columns=["doi", "journal-ref", "comments", "license", "report-no", "versions"])
-df = df.replace('\n', ' ', regex=True)
-
-# Modificar ubicacion
-df.to_csv(".../dataset/arxiv-metadata.csv", header=True, index=False)
-
-# Modificar ubicacion
-csv_file = '.../dataset/arxiv-metadata.csv'
-num_files = 3
-df = pd.read_csv(csv_file)
-rows_per_file = len(df) // num_files
-split_dfs = [df[i*rows_per_file:(i+1)*rows_per_file] for i in range(num_files)]
-
-for i, split_df in enumerate(split_dfs):
-    split_df.to_csv(f'arxiv-metadata-{i+1}.csv', index=False, header=None, sep=',')
- ``` 
+### Análisis comparativo con nuestra propia implementación
