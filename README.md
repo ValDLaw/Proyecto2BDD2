@@ -65,9 +65,11 @@ El preprocesamiento de la data se realizó en un archivo aparte, llamado ```prep
 
 `preprocesar_query(query)`: toma una consulta de texto como entrada y la procesa utilizando `tokenizar` y `eliminarStopWords`. Devuelve una lista de tokens procesados.
 
-`preprocesar_textos(textos)`: es de forma muy similar a `preprocesar_query`.
+`preprocesar_textos(textos)`: es de forma muy similar a `preprocesar_query`, pero para los documentos propuestos.
 
 ### Construcción del índice invertido
+
+Para implementar nuestro propio índice invertido, primero realizamos el cálculo de los pesos TF-IDF, estructurado en el siguiente archivo:
 
 **tfidf.py**
 
@@ -81,6 +83,8 @@ El preprocesamiento de la data se realizó en un archivo aparte, llamado ```prep
 
 `compute_tfidf(collection)`: calcula el **tf-idf** para cada término en cada documento en la colección de documentos. Utiliza "compute_tf" para obtener la frecuencia de término. Además, se calcula y almacena la longitud (norma) de cada vector de documento en el diccionario "length". También se crea un índice invertido en "index", donde cada término se asigna a una lista de pairs que contienen el nombre del documento y la frecuencia del término en ese documento.
 
+Luego, construimos el índice invertido a partir de los pesos, en un archivo aparte:
+
 **index.py**
 
 `building(self, textos)`: construye el índice invertido a partir de una colección de textos. Utiliza la función "preprocesar_textos" y luego usa "compute_tfidf" para obtener el índice invertido, la frecuencia inversa de documento (idf) y la longitud de los vectores de documento. Luego guarda todo en el archivo especificado por "index_file" utilizando el método "save_index".
@@ -93,7 +97,9 @@ El preprocesamiento de la data se realizó en un archivo aparte, llamado ```prep
 
 ### Manejo de memoria secundaria
 
+A continuación, se explicará la implementación del índice invertido a partir del método de **Single-pass in-memory indexing (SPIMI)**.
 
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/ae4e3529-be83-4880-a28a-0b28cc8ae779)
 
 ### Ejecución óptima de consultas
 
@@ -106,7 +112,6 @@ El preprocesamiento de la data se realizó en un archivo aparte, llamado ```prep
 ### Búsqueda textual
 
 ### Presentación de resultados
-## Frontend
 
 ### Diseño del índice con PostgreSQL
 Creamos un Database con nombre 'Proyecto2BDD2' y creamos la tabla Articles con el siguiente comando:
@@ -124,9 +129,9 @@ CREATE TABLE article (
 ```
 Nos conectamos a nuestra Database desde terminal y ejecutamos lo siguiente para poder insertar todos los valores del csv a nuestra tabla:
 ``` sql
-\copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
-\copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
-\copy article FROM '/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '.../dataset/arxiv-metadata-1.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '.../dataset/arxiv-metadata-2.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
+\copy article FROM '.../dataset/arxiv-metadata-3.csv' WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER);
 ```  
 
 Luego, añadimos la columna vectorized_content y la llenamos de la siguiente manera:  
@@ -219,10 +224,9 @@ resultado = collection.find(
     { 'score': { '$meta': 'textScore' } }).sort([('score', { '$meta': 'textScore' })]).limit(k)
  ```  
 
-### Análisis comparativo con su propia implementación
+### Análisis comparativo con nuestra propia implementación
 
 ### Screenshots de la GUI
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
 ![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
-
