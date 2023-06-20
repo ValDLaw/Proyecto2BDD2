@@ -85,7 +85,7 @@ ALTER TABLE article ADD COLUMN vectorized_content TSVECTOR;
 UPDATE article SET vectorized_content = setweight(to_tsvector('english', title), 'A') || setweight(to_tsvector('english', abstract), 'B') || setweight(to_tsvector('english', authors), 'C');
 ```
 
-Creamos la api llamada *postgres.py* con una única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
+Creamos el archivo *postgres.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.  
 
 ``` python
 @app.route('/consulta', methods=['POST'])
@@ -122,7 +122,52 @@ def consulta():
  SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;
  ```  
 
-### Diseño del índice con MongoDB
+### Diseño del índice con MongoDB  
+Importamos los datos del archivo 'arxiv-metadata-oai-snapshot.json' a nuestra Database en MongoDB usando la herramiento Import de MongoDB Compass. Luego, creamos una colección llamada **articles**.  
+![Articles](images/mongodb_articles.png)  
+
+Luego, creamos el índice compuesto en nuestra colección, utilizando los campos *title*, *abstract* y *authors*.    
+
+Creamos el archivo *mongodb.py* con una api con única ruta '/consultas', en la cual recibíamos como parámetros el texto de búsqueda y un entero k. Esta nos devolvía una lista con el top k de los artículos que hacian match y el tiempo de ejecución de la consulta.   
+
+ ``` python
+@app.route('/consulta', methods=['POST'])
+def consulta():
+    data = request.get_json()
+    parametro = data['parametro']
+    k = data['k']
+
+    db = client['Proyecto2BDD2']  # Nombre de la base de datos en MongoDB
+    collection = db['articles']  # Nombre de la colección en MongoDB
+
+    # Ejecutar la consulta en MongoDB y medir tiempos
+    start_time = time.time()
+    resultado = collection.find(
+    { '$text': { '$search': parametro } },
+    { 'score': { '$meta': 'textScore' } }).sort([('score', { '$meta': 'textScore' })]).limit(k)
+    end_time = time.time()
+
+    # Convertir los resultados en una lista de diccionarios
+    resultados_lista = []
+    for documento in resultado:
+        documento['_id'] = str(documento['_id'])
+        resultados_lista.append(documento)
+
+    tiempo_ejecucion = end_time - start_time
+
+    response = {
+        'resultados': resultados_lista,
+        'tiempo_ejecucion': tiempo_ejecucion
+    }
+ ```  
+
+  Notamos que la query empleada fue la siguiente:  
+
+ ``` c++
+resultado = collection.find(
+    { '$text': { '$search': parametro } },
+    { 'score': { '$meta': 'textScore' } }).sort([('score', { '$meta': 'textScore' })]).limit(k)
+ ```  
 
 ## Frontend
 
