@@ -16,8 +16,9 @@ El presente proyecto está enfocado en la construcción óptima de un índice in
 ### Descripción del dominio de datos
 El dominio de datos escogido para este proyecto consiste en un conjunto de más de 2.2 millones de papers académicos almacenados en la base de datos de ArXiv (https://www.kaggle.com/datasets/Cornell-University/arxiv). La gran mayoría de estos archivos están enfocados en las disciplinas de física, matemática, ingeniería, biología, ciencias de la computación, y entre otras áreas académicas. Cada entrada en este repositorio cuenta con el título de su artículo, el autor, las categorías que abarca, un corto resumen de su contenido y su fecha de actualización. Fue escogido debido a la consistencia y simpleza de los atributos seleccionados para cada fila, además de contar con una cantidad considerable de data para trabajar.
 
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/b0d83442-7283-4994-89da-de70a4df3a53)
-
+<div align="center">
+ <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/b0d83442-7283-4994-89da-de70a4df3a53" alt="Image" />
+</div>
 
 ## Backend
 El backend se desarrolló en lenguaje de programación Python, se desarrollaron APIs y rutas para cada método de indexación (PostgreSQL, MongoDB e implementación propia) a partir de la base de datos proporcionada.
@@ -99,13 +100,17 @@ Luego, construimos el índice invertido a partir de los pesos, en un archivo apa
 
 A continuación, se explicará la implementación del índice invertido a partir del método de **Single-pass in-memory indexing (SPIMI)**. Este método consiste en la construcción de bloques a partir de los términos (y no específicamente sus índices), creando diccionarios para cada bloque y respetando el espacio limitado a cada uno para la memoria secundaria, en la cual luego serán escritos y fusionados con la función **merge**.
 
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/955d4c14-fbdd-4659-95e2-45ed010c1074)
+<div align="center">
+ <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/955d4c14-fbdd-4659-95e2-45ed010c1074" alt="Image" />
+</div>
 
 ### Ejecución óptima de consultas
 
 Para realizar una consulta en nuestro buscador, se ingresará (en lenguaje natural) el tema deseado y la cantidad de documentos relacionados al tema (top k) que el usuario gustaría que se le muestre. Se hará entonces un llamado a las funciones del backend tomando los atributos de la query como ```string```, y el valor de k como ```int```.
 
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/87ae1bd6-a652-4876-9a9c-77db46021e17)
+<div align="center">
+ <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/87ae1bd6-a652-4876-9a9c-77db46021e17" alt="Image" />
+</div>
 
 Al ejecutar la consulta, se seguirán las siguientes pasos, independientemente del índice aplicado:
 - Se realiza un preprocesamiento interno de la query, pues pasa por un proceso de stemming para reducir cada palabra a su raiz.
@@ -247,9 +252,11 @@ resultado = collection.find(
 
 
 ### Screenshots de la GUI
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600)
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838)
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe)
+<div align="center">
+ <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600" alt="Image" />
+ <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838" alt="Image" />
+ <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe" alt="Image" />
+</div>
 
 ## Análisis de resultados  
 A continuación, explicaremos cada una de las técnicas empleadas y el porqué del tiempo de ejecución en cada caso.
