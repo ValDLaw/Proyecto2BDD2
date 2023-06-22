@@ -20,7 +20,7 @@ def eliminarStopWords(tokenText):
     stoplist = ["0","1","2","3","4","5","6","7","8","9","_","--", "\\",
                 "^",">",'.',"@","=","$" , '?', '[', ']', '¿',"(",")",
                 '-', '!',"<", '\'',',', ":","``","''", ";", "»", '(-)',
-                "+","0","/", "«", "{", "}", "--", "|"]
+                "+","0","/", "«", "{", "}", "--", "|","`"]
     palabras_stoplist += stoplist
     #Reducir palabras
 
@@ -39,11 +39,6 @@ def eliminarStopWords(tokenText):
             lstTokens.append(token)
 
     return lstTokens
-
-def preprocesar_query(query):
-    tokenText = tokenizar(query)
-    tokensLst = eliminarStopWords(tokenText)
-    return tokensLst
 
 def preprocesar_textos(texto):
     tokenText = tokenizar(texto)
