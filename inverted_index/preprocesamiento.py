@@ -16,6 +16,7 @@ def eliminarStopWords(tokenText):
     customSW = open('./inverted_index/docs/stopwords.txt','r')
     palabras_stoplist = customSW.read() #.splitlines()
     customSW.close()
+    palabras_stoplist = nltk.word_tokenize(palabras_stoplist.lower())
     stoplist = ["0","1","2","3","4","5","6","7","8","9","_","--", "\\",
                 "^",">",'.',"@","=","$" , '?', '[', ']', '¿',"(",")",
                 '-', '!',"<", '\'',',', ":","``","''", ";", "»", '(-)',

@@ -79,7 +79,7 @@ def compute_tfidf(data, collection):
 def idf(doc_freq, n_docs):
     N = n_docs
     df = doc_freq
-    return math.log10((N/df)+1)
+    return round(math.log10((N/df)+1),4)
 
 def tf_idf(freq, doc_freq, n_docs):
     if doc_freq == 0: #si aparece
@@ -87,4 +87,4 @@ def tf_idf(freq, doc_freq, n_docs):
     tf = 1+math.log10(freq)
     idf_ = idf(doc_freq, n_docs)
 
-    return tf*idf_
+    return round(tf*idf_,4)

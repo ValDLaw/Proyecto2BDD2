@@ -20,8 +20,8 @@ class InvertIndex:
         self.length = {}
         self.BLOCK_LIMIT = abstracts_por_bloque
         self.lista_de_bloques = []
-        self.data_path = "./inverted_index/docs/"+dataFile #data.csv
-        self.path_index = "./inverted_index/spimi.txt"
+        self.data_path = "/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/inverted_index/docs/"+dataFile #data.csv
+        self.path_index = "/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/inverted_index/spimi.txt"
 
 
     def SPIMIConstruction(self):
@@ -33,6 +33,7 @@ class InvertIndex:
         block_n = 1
 
         for idx, row in data.iterrows():
+            if idx % 7000: print("Estamos en el index ", idx)
             abstract = row["abstract"]
             docID = row["id"]
             tokensAbstract = preprocesar_textos(abstract)
@@ -45,7 +46,7 @@ class InvertIndex:
                 if sys.getsizeof(dictTerms) > self.BLOCK_LIMIT:
                     sorted_block = sorted(dictTerms.items(), key=itemgetter(0))
                     block_name = "bloque-"+str(block_n)+".txt"
-                    with open("./inverted_index/blocks/"+block_name, "w") as file_part:
+                    with open("/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/inverted_index/docs/blocks/"+block_name, "w") as file_part:
                         json.dump(sorted_block, file_part, indent=2)
                     sorted_block = {} #clear
                     block_n += 1
@@ -55,12 +56,12 @@ class InvertIndex:
         if dictTerms:
             sorted_block = sorted(dictTerms.items(), key=itemgetter(0))
             block_name = "bloque-"+str(block_n)+".txt"
-            with open("./inverted_index/docs/blocks/"+block_name, "w") as file_part:
+            with open("/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/inverted_index/docs/blocks/"+block_name, "w") as file_part:
                 json.dump(sorted_block, file_part, indent=2)
             dictTerms = defaultdict(list)
 
-    def listFiles():
-        filepaths = "./inverted_index/blocks/"
+    def listFiles(self):
+        filepaths = "/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/inverted_index/docs/blocks/"
         files = []
         for file_name in os.listdir(filepaths):
             file_path = os.path.join(filepaths, file_name)
@@ -68,7 +69,7 @@ class InvertIndex:
                 files.append(file_path)
         return files #list of pathnames
     
-    def merge(block1, block2):
+    def merge(self, block1, block2):
         merge_final = OrderedDict()
 
         for term, ids in block1.items():
@@ -86,7 +87,7 @@ class InvertIndex:
 
         return bloque_ordenado
         
-    def write_index_tf_idf(inverted_dict, filename, n_documents):
+    def write_index_tf_idf(self, inverted_dict, filename, n_documents):
         with open(filename, "w") as index:
             for term, ids in inverted_dict.items():
                 docFrec = len(ids) #en cuantos docs aparece?
@@ -99,7 +100,7 @@ class InvertIndex:
                     index.write(f"{doc_id},{termdoc_tfidf};")
                 index.write("\n")
 
-    def write_index(inverted_dict, filename):
+    def write_index(self, inverted_dict, filename):
         with open(filename, "w") as index:
             for term, ids in inverted_dict.items():
                 index.write(f"{term}:{ids};")
@@ -130,6 +131,7 @@ class InvertIndex:
 
     def prueba(self):
         #Merge completo
+        self.SPIMIConstruction()
         merge_final = self.index_blocks()
         self.write_index_tf_idf(merge_final, self.path_index, len(merge_final))
 
