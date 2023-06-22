@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def compute_tf(collection):
     doc_tf = {}
@@ -37,22 +38,6 @@ def compute_idf(term, idf_freq, term_freq, N):
 def cosine_sim(Q, Doc):  
   return round(np.dot(Q, Doc) / (np.linalg.norm(Q)*np.linalg.norm(Doc)),3)
 
-def create_inverted_index(textos_tfidf):
-    matriz = []
-    for doc1 in textos_tfidf.values():
-        row = []
-        array1 = np.array(list(doc1))
-        for doc2 in textos_tfidf.values():
-            array2 = np.array(list(doc2))
-            row.append(cosine_sim(array1, array2))
-        matriz.append(row)
-
-    count = 0
-    print("      doc1   doc2   doc3   doc4   doc5   doc6")
-    for row in matriz:
-        print("doc" + str(count), row)
-        count += 1
-
 def compute_tfidf(data, collection):
     tfidf = {} #para tener score tfidf
     idf_freq = {} #se va updateando cada vez que se saque idf de una palabra, para no recalcular
@@ -90,3 +75,16 @@ def compute_tfidf(data, collection):
     #create_inverted_index(tfidf) esto no es el inverted index
 
     return length, idf_freq, index
+
+def idf(doc_freq, n_docs):
+    N = n_docs
+    df = doc_freq
+    return math.log10((N/df)+1)
+
+def tf_idf(freq, doc_freq, n_docs):
+    if doc_freq == 0: #si aparece
+        return 0
+    tf = 1+math.log10(freq)
+    idf_ = idf(doc_freq, n_docs)
+
+    return tf*idf_
