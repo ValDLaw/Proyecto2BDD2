@@ -35,8 +35,14 @@ def compute_idf(term, idf_freq, term_freq, N):
         idf_freq[term] = idf
     return idf
 
-def cosine_sim(Q, Doc):  
-  return round(np.dot(Q, Doc) / (np.linalg.norm(Q)*np.linalg.norm(Doc)),3)
+#Para querys
+def calculate_tf(query, document):
+    term_frequency = document.count(query)
+    return term_frequency / len(document)
+
+def calculate_idf(query, documents):
+    document_frequency = sum(1 for document in documents if query in document)
+    return math.log(len(documents) / (document_frequency + 1))
 
 def compute_tfidf(data, collection):
     tfidf = {} #para tener score tfidf

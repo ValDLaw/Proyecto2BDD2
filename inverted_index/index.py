@@ -1,5 +1,5 @@
 from inverted_index.preprocesamiento import preprocesar_textos
-from inverted_index.tfidf import compute_tfidf, tf_idf
+from inverted_index.tfidf import compute_tfidf, tf_idf, calculate_idf, calculate_tf
 import pandas as pd
 
 import sys
@@ -10,6 +10,8 @@ import json
 import os
 from operator import itemgetter
 from collections import OrderedDict, defaultdict
+import math
+import numpy as np
 
 
 class InvertIndex:
@@ -24,16 +26,20 @@ class InvertIndex:
         self.path_index = "/Users/ValDLaw/Documents/GitHub/2023-1/BDD2/Proyecto2BDD2/inverted_index/spimi.txt"
 
 
-    def SPIMIConstruction(self):
+    def loadData(self):
         data = pd.read_csv(self.data_path, header=None)
         data.columns = ["id","submitter","authors","title","categories","abstract","update_date","authors_parsed"]
+        data["id"] = data["id"].astype(str)
+        return data
 
-        documents_count = len(data)
+    def SPIMIConstruction(self):
+        data = self.loadData()
+
         dictTerms = defaultdict(list)
         block_n = 1
 
         for idx, row in data.iterrows():
-            if idx % 20000 == 0: print("Estamos en el index ", idx)
+            #if idx % 20000 == 0: print("Estamos en el index ", idx)
             abstract = row["abstract"]
             docID = row["id"]
             tokensAbstract = preprocesar_textos(abstract)
@@ -87,8 +93,8 @@ class InvertIndex:
 
         return bloque_ordenado
         
-    def write_index_tf_idf(self, inverted_dict, filename, n_documents):
-        with open(filename, "w") as index:
+    def write_index_tf_idf(self, inverted_dict, n_documents):
+        with open(self.path_index, "w") as index:
             for term, ids in inverted_dict.items():
                 docFrec = len(ids) #en cuantos docs aparece?
                 index.write(f"{term}:")
@@ -129,12 +135,128 @@ class InvertIndex:
 
         return ordenar_merge
 
+    #QUERY
+    def cos_Similarity(self, query, cosine_docs):
+        cosine_scores = defaultdict(float)
+
+        for docId in cosine_docs:
+            doc = cosine_docs[docId]
+            q = query
+            sum_ = 0
+            sum_ += round(np.dot(q/(np.linalg.norm(q)),doc/(np.linalg.norm(doc))),5)
+            cosine_scores[docId] = sum_
+        return cosine_scores
+
+    def load_Index(self):
+        result = []
+        with open(self.path_index, 'r') as file:
+            document = file.read()
+
+            lines = document.split('\n')
+            for line in lines:
+                if line:
+                    key, posting_list = line.split(':', 1)
+                    result.append((key, posting_list)) #linea de strings, key con posting_list en string
+        return result       
+    
+    #IMPLEMENTAR BINARY!
+    #Index Data es cada linea del documento como un set Term, postinglist
+    #siendo postinglist toda una string de docId, tf_idf; docId2, tf_idf;
+    def binary_search(query, index_data):
+        low = 0
+        high = len(index_data) - 1
+        
+        while low <= high:
+            mid = (low + high) // 2
+
+            print(index_data[mid][0]< query)
+            print("query ", query)
+            print("index_datamid ",index_data[mid][0])
+            if index_data[mid][0] == query:
+                return index_data[mid]
+            elif index_data[mid][0] < query:
+                low = mid + 1
+            else:
+                high = mid - 1
+        
+        return None
+
+    #Sequential Search on Index
+    def loop(self, term, index_data):
+        for data in index_data:
+            term_index = data[0]
+            docId_scores = data[1]
+            if term_index == term:
+                return docId_scores.split(";")[:-1]
+        return None
+
+    def retrieve_k_nearest(self, query, k):
+        data = self.loadData()
+
+        query = preprocesar_textos(query)
+        
+        index_data = self.load_Index()
+        
+        #print("query keywords ", query)
+
+        cos_to_evaluar = defaultdict(dict)
+        idf_query=defaultdict(float)
+        query_tfidf = []
+
+        for term in query:
+            #term_data = binary_search(term, index_data)
+            term_data = self.loop(term, index_data) #posting list
+            if term_data is None:
+                continue
+            
+            idf_query[term] = round(math.log10((len(data)/len(term_data)) + 1),4)
+
+            for docId_tfidfin in term_data:
+                docId = docId_tfidfin.split(",")[0]
+                tf_idf = docId_tfidfin.split(",")[1]
+                cos_to_evaluar[docId][term] = tf_idf
+                #va guardando en cada doc, el tf idf en orden de los querys keywords
+            
+            tf_ = calculate_tf(term, query)
+            idf_ = idf_query[term]
+            query_tfidf.append(tf_*idf_)
+        
+        #Crear vectores caracteristicos
+        cosine_docs = defaultdict(list)
+
+        for docId in cos_to_evaluar:
+            for term in query:
+                if term in cos_to_evaluar[docId]:
+                    cosine_docs[docId].append(float(cos_to_evaluar[docId][term]))
+                else:
+                    cosine_docs[docId].append(0)
+
+        scores = self.cos_Similarity(query, cosine_docs)
+
+        # Ordenar los documentos por puntuación de similitud de coseno en orden descendente
+        scores = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
+        scores = scores[:k]
+        
+        temp = []
+        for result in scores:
+            temp.append(result[0])
+
+
+        # INDICES para hallar en el dataframe
+        matching_indices = data.loc[data["id"].isin(temp)].index
+
+        return matching_indices
+    
+    #PRUEBAS
+
     def prueba(self):
         #Merge completo
         self.SPIMIConstruction()
         merge_final = self.index_blocks()
-        self.write_index_tf_idf(merge_final, self.path_index, len(merge_final))
+        self.write_index_tf_idf(merge_final, len(merge_final))
 
-    def getTokens(self, textos):
-        collection = preprocesar_textos(textos)
-        return collection
+    def prueba2(self):
+        k = 3
+        results = self.retrieve_k_nearest("Quantum Theory of Integrals by Reimann", k)
+        data = self.loadData()
+        return data.iloc[results] #rows con los resultados para la data
