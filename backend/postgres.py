@@ -24,7 +24,8 @@ def consulta():
 
     # Ejecutar la consulta en PostgreSQL y medir el tiempo de ejecución
     start_time = time.time()
-    query = "SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;"
+    query = "SELECT *, ts_rank(vectorized_content, query) rank FROM article, plainto_tsquery('english', %s) query ORDER BY rank DESC LIMIT %s"
+    #query = "SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;"
     cursor.execute(query, (parametro, k))
     resultados = cursor.fetchall()
     end_time = time.time()
@@ -56,4 +57,4 @@ def indice():
     return "Api para PostgreSQL"
 
 if __name__ == '__main__':
-    app.run(port=5002)
+    app.run(port=5016)

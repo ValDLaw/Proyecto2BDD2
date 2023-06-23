@@ -1,6 +1,7 @@
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem.snowball import SnowballStemmer
+import os
 
 stemmer = SnowballStemmer('english')
 nltk.download('punkt')
@@ -11,16 +12,16 @@ def tokenizar(texto):
     tokenText = nltk.Text(tokens).tokens
     return tokenText
 
-def eliminarStopWords(tokenText):
-    #elegir stopwords
-    customSW = open('./inverted_index/docs/stopwords.txt','r')
+def eliminarStopWords(tokenText): #elegir stopwords
+    print(os.getcwd())
+    customSW = open('../inverted_index/docs/stopwords.txt','r')
     palabras_stoplist = customSW.read() #.splitlines()
     customSW.close()
     palabras_stoplist = nltk.word_tokenize(palabras_stoplist.lower())
     stoplist = ["0","1","2","3","4","5","6","7","8","9","_","--", "\\",
                 "^",">",'.',"@","=","$" , '?', '[', ']', '¿',"(",")",
                 '-', '!',"<", '\'',',', ":","``","''", ";", "»", '(-)',
-                "+","0","/", "«", "{", "}", "--", "|","`"]
+                "+","0","/", "«", "{", "}", "--", "|","`","~"]
     palabras_stoplist += stoplist
     #Reducir palabras
 

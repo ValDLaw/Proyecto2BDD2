@@ -39,7 +39,7 @@ class InvertIndex:
         block_n = 1
 
         for idx, row in data.iterrows():
-            #if idx % 20000 == 0: print("Estamos en el index ", idx)
+            if idx % 20000 == 0: print("Estamos en el index ", idx)
             abstract = row["abstract"]
             docID = row["id"]
             tokensAbstract = preprocesar_textos(abstract)
@@ -138,7 +138,6 @@ class InvertIndex:
     #QUERY
     def cos_Similarity(self, query, cosine_docs):
         cosine_scores = defaultdict(float)
-
         for docId in cosine_docs:
             doc = cosine_docs[docId]
             q = query
@@ -231,7 +230,7 @@ class InvertIndex:
                 else:
                     cosine_docs[docId].append(0)
 
-        scores = self.cos_Similarity(query, cosine_docs)
+        scores = self.cos_Similarity(query_tfidf, cosine_docs)
 
         # Ordenar los documentos por puntuación de similitud de coseno en orden descendente
         scores = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)

@@ -92,6 +92,27 @@
           </tbody>
         </table>
       </div>
+      <div v-if="tablaSeleccionada === 'tablaC'" class="tabla-container">
+        <table>
+          <thead>
+            <tr>
+              <th v-for="header in tableCHeaders" :key="header.text">{{ header.text }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="result in tableCResults" :key="result.value">
+              <td>{{ result.id }}</td>
+              <td>{{ result.submitter }}</td>
+              <td>{{ result.authors }}</td>
+              <td>{{ result.title }}</td>
+              <td>{{ result.categories }}</td>
+              <td>{{ result.abstract }}</td>
+              <td>{{ result.update_date }}</td>
+              <td>{{ result.authors_parsed }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -152,10 +173,21 @@ export default {
         { text: 'Update Date', value: 'update_date' },
         { text: 'Authors Parsed', value: 'authors_parsed' },
       ],
+      tableCHeaders: [
+        { text: 'ID', value: 'id' },
+        { text: 'Submitter', value: 'submitter' },
+        { text: 'Authors', value: 'authors' },
+        { text: 'Title', value: 'title' },
+        { text: 'Categories', value: 'categories' },
+        { text: 'Abstract', value: 'abstract' },
+        { text: 'Update Date', value: 'update_date' },
+        { text: 'Authors Parsed', value: 'authors_parsed' },
+      ],
 
       // Resultados de las consultas a las tablas
       tableAResults: [],
       tableBResults: [],
+      tableCResults: [],
     };
   },
   mounted() {
@@ -179,6 +211,8 @@ export default {
         this.searchTableA();
       } else if (this.tablaSeleccionada === 'tablaB') {
         this.searchTableB();
+      } else if (this.tablaSeleccionada === 'tablaC') {
+        this.searchTableC();
       }
       const scrollElement = document.getElementById('scroll-target');
   
@@ -189,7 +223,7 @@ export default {
 
     searchTableA() {
       axios
-        .post('http://127.0.0.1:5002/consulta', {
+        .post('http://127.0.0.1:5016/consulta', {
           parametro: this.searchTerm,
           k: this.topK,
         }, {
@@ -210,7 +244,7 @@ export default {
 
     searchTableB() {
       axios
-        .post('http://127.0.0.1:5001/consulta', {
+        .post('http://127.0.0.1:5011/consulta', {
           parametro: this.searchTerm,
           k: this.topK,
         }, {
@@ -222,6 +256,26 @@ export default {
           const startIndex = (this.currentPage - 1) * this.itemsPerPage;
           const endIndex = startIndex + this.itemsPerPage;
           this.tableBResults = allResults.slice(startIndex, endIndex);
+          this.tiempo_consulta = response.data.tiempo_ejecucion;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    searchTableC() {
+      axios
+        .post('http://127.0.0.1:5009/consulta', {
+          parametro: this.searchTerm,
+          k: this.topK,
+        }, {
+          withCredentials: true, // Habilita CORS
+        })
+        .then((response) => {
+          console.log(response.data)
+          const allResults = response.data.resultados;
+          const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+          const endIndex = startIndex + this.itemsPerPage;
+          this.tableCResults = allResults.slice(startIndex, endIndex);
           this.tiempo_consulta = response.data.tiempo_ejecucion;
         })
         .catch((error) => {
