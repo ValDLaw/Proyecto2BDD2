@@ -336,7 +336,9 @@ Ejecutamos 5 consultas, usando cada una de las 3 implementaciones de índices de
 | Consulta 4: "supernova expansion of the universe" |  10.69 s  |  50.07 µs |  1.64 s |
 | Consulta 5: "greedy algorithms" |  8.96 s  |  45.78 µs |  1.97 s |
 
-![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9965c1e2-3164-4b18-b67d-6a1daa195596)
+<div align="center">
+ <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9965c1e2-3164-4b18-b67d-6a1daa195596" alt="Image" />
+</div>
 
 ### Screenshots de la GUI
 <div align="center">
