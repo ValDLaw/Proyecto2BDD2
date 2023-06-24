@@ -331,6 +331,10 @@ Sin embargo, la eficacia y la velocidad de las consultas pueden depender de vari
 
 ### Implementación propia
 
+En nuestra implementación utilizamos Single-pass in-memory indexing, por lo que dividimos el índice en bloques más pequeños, lo que facilita su almacenamiento y manejo. Cada bloque se guarda en un archivo JSON para una gestión eficiente de los datos. Además, dado que hacemos el procesamiento en memoria secundaria, no es necesario que todo entre en la memoria principal, especialmente cuando tratamos grandes cantidades de datos. 
+
+Nuestra implementación facilita las búsquedas y consultas eficientes en el índice invertido. Algo importante a resaltar es que los resultados varían ligeramente en comparación a los que devuelven PostgreSQL y MongoDB. Esto ocurre porque las bases de datos utilizan los campos *title*, *abstract* y *authors*, mientras que nuestra implementación sólo usa el *abstract*.
+
 ## Conclusiones
 
 ## Video de presentación
