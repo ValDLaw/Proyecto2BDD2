@@ -20,6 +20,23 @@ El dominio de datos escogido para este proyecto consiste en un conjunto de más 
  <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/b0d83442-7283-4994-89da-de70a4df3a53" alt="Image" />
 </div>
 
+A continuación, una descripción breve de los tipos de datos manejados en cada campo del dataset:
+- id (string): Identificador
+- submitter (string): Remisor
+- authors (string): Autores
+- title (string): Título
+- comments (string): Comentarios
+- journal-ref (string): Referencia de revista
+- doi (string): DOI
+- report-no (string): Número de reporte
+- categories (string): Categorías
+- license (string): Licencia
+- abstract (string): Resumen
+- versions (lista de diccionarios): Versiones y sus fechas de publicación
+- update_date (string): Fecha de actualización
+- authors_parsed (lista de listas): Autores organizados en una lista
+
+Este sería un ejemplo de una entrada del dataset:
 ``` json
 "root": {
 	"id": "0704.0001"
