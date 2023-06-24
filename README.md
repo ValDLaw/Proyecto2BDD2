@@ -283,13 +283,24 @@ resultado = collection.find(
 
 ### Diseño del índice invertido por implementación propia
 
-Para la implementación propia del índice invertido seguimos los siguientes pasos:
+Para la implementación propia del índice invertido desde la API en Flask seguimos los siguientes pasos:
+
+Recibimos en un POST la query de búsqueda y la cantidad de "k" resultados requeridos en formato JSON.
 
 Cargamos los datos del archivo CSV con la información de los documentos. Usamos la función `loadData` para cargar los datos en un DataFrame de pandas.
 
 Luego importamos el índice invertido desde un archivo de texto utilizando la función `load_Index`. Esto nos da una lista de tuplas que representan los términos y sus documentos asociados con los valores de tf-idf. Para procesar una consulta, preprocesamos la query y calculamos su tf-idf.
 
-Calculamos la similitud del coseno entre la consulta y los documentos utilizando la función `cos_Similarity`. En base a esto, ordenamos los documentos por puntuación de similitud y devolvemos los k mejores resultados.
+Ejecutamos `retrieve_k_nearest` para obtener los k mejores resultados en base a la puntuación de similitud calculado con la función `cos_Similarity`.
+
+Además, medimos el tiempo de ejecución, y devolvemos el siguiente JSON:
+
+``` json
+    {
+        'resultados': resultados_dict,
+        'tiempo_ejecucion': tiempo_ejecucion
+    }
+```
 
 En este caso, nosotros sólo utilizamos el *abstract* para calcular el índice invertido y la similitud entre los documentos y la query, a diferencia de PostgreSQL y MongoDB.
 
