@@ -147,8 +147,8 @@ export default {
     return {
       isScrolled: false,
       searchTerm: '',
-      tablaSeleccionada: 'tablaA',
-      activeButton: 'tablaA',
+      tablaSeleccionada: 'tablaC',
+      activeButton: 'tablaC',
       tiempo_consulta: 0,
       topK: 5,
       currentPage: 1,
@@ -264,7 +264,7 @@ export default {
     },
     searchTableC() {
       axios
-        .post('http://127.0.0.1:5009/consulta', {
+        .post('http://127.0.0.1:5023/consulta', {
           parametro: this.searchTerm,
           k: this.topK,
         }, {
