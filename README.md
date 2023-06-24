@@ -326,7 +326,7 @@ Ejecutamos `retrieve_k_nearest` para obtener los k mejores resultados en base a 
 En este caso, nosotros sólo utilizamos el *abstract* para calcular el índice invertido y la similitud entre los documentos y la query, a diferencia de PostgreSQL y MongoDB.
 
 ### Presentación de resultados
-Ejecutamos 5 consultas, usando cada una de las 3 implementaciones de índices descritas anteriormente para los datos de ArXiv. El tiempo de ejecución de cada consulta fue medido y se presenta en la siguiente tabla:
+Ejecutamos 5 consultas, usando cada una de las 3 implementaciones de índices descritas anteriormente para los datos de ArXiv. El tiempo de ejecución de cada consulta fue medido y se presenta en la siguiente tabla y gráfico de comparación:
 
 | Tiempos de ejecución | PostgreSQL | MongoDB | índice invertido |
 | ------------- | ------------- | ------------- | ------------- |
@@ -336,6 +336,7 @@ Ejecutamos 5 consultas, usando cada una de las 3 implementaciones de índices de
 | Consulta 4: "supernova expansion of the universe" |  10.69 s  |  50.07 µs |  1.64 s |
 | Consulta 5: "greedy algorithms" |  8.96 s  |  45.78 µs |  1.97 s |
 
+![image](https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9965c1e2-3164-4b18-b67d-6a1daa195596)
 
 ### Screenshots de la GUI
 <div align="center">
