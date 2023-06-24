@@ -244,7 +244,37 @@ def consulta():
         'tiempo_ejecucion': tiempo_ejecucion
     }
  ```  
-(!)
+
+Finalmente, creamos el archivo *selfII.py* que contiene una API con una sól ruta '/consulta'. Esta acepta dos parámetros: el texto de búsqueda y un número entero llamado 'k'. Con el JSON de input, la API realiza una consulta en nuestro índice invertido para obtener los k mejores artículos que coincidan con el texto de búsqueda. Finalmente, se construye una respuesta que incluye la lista de resultados y el tiempo de ejecución de la consulta, y se devuelve como una respuesta JSON.
+
+``` python
+
+@app.route('/consulta', methods=['POST'])
+def consulta():
+    data_json = request.get_json()
+    parametro = data_json['parametro']
+    k = data_json['k']
+
+    # Ejecutar la consulta y medir el tiempo de ejecución
+    start_time = time.time()
+    results = retrieve_k_nearest(parametro,k)
+    resultados = data.iloc[results]
+    end_time = time.time()
+
+    tiempo_ejecucion = end_time - start_time
+
+    print(resultados)
+    # Convertir el DataFrame en una lista de diccionarios
+    resultados_dict = resultados.to_dict(orient='records')
+
+    response = {
+        'resultados': resultados_dict,
+        'tiempo_ejecucion': tiempo_ejecucion
+    }
+
+    return jsonify(response)
+
+```
 
 ### Diseño del índice con PostgreSQL
 Para la implementación del índice con PostgreSQL, se siguió esta serie de pasos:
@@ -292,15 +322,6 @@ Cargamos los datos del archivo CSV con la información de los documentos. Usamos
 Luego importamos el índice invertido desde un archivo de texto utilizando la función `load_Index`. Esto nos da una lista de tuplas que representan los términos y sus documentos asociados con los valores de tf-idf. Para procesar una consulta, preprocesamos la query y calculamos su tf-idf.
 
 Ejecutamos `retrieve_k_nearest` para obtener los k mejores resultados en base a la puntuación de similitud calculado con la función `cos_Similarity`.
-
-Además, medimos el tiempo de ejecución, y devolvemos el siguiente JSON:
-
-``` json
-    {
-        'resultados': resultados_dict,
-        'tiempo_ejecucion': tiempo_ejecucion
-    }
-```
 
 En este caso, nosotros sólo utilizamos el *abstract* para calcular el índice invertido y la similitud entre los documentos y la query, a diferencia de PostgreSQL y MongoDB.
 

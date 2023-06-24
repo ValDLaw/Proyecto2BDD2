@@ -145,7 +145,7 @@ def consulta():
     parametro = data_json['parametro']
     k = data_json['k']
 
-    # Ejecutar la consulta en PostgreSQL y medir el tiempo de ejecución
+    # Ejecutar la consulta y medir el tiempo de ejecución
     start_time = time.time()
     results = retrieve_k_nearest(parametro,k)
     resultados = data.iloc[results]
