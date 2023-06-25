@@ -372,9 +372,5 @@ Nuestra implementación facilita las búsquedas y consultas eficientes en el ín
 
 Este trabajo nos ha permitido comprender diferentes enfoques para realizar búsquedas en bases de datos, desde la construcción de índices invertidos utilizando SPIMI hasta el uso de las soluciones que usan MongoDB y PostgreSQL. Cada enfoque tiene sus propias ventajas y desventajas, y la elección dependerá de los requisitos del proyecto, el tamaño del conjunto de datos y las funcionalidades requeridas. Es importante evaluar las opciones disponibles y considerar aspectos como el rendimiento, la escalabilidad y la flexibilidad para garantizar búsquedas eficientes y precisas en bases de datos.
 
-
-## Organización del equipo
-GitHub Project: https://github.com/users/ValDLaw/projects/3
-
 ## Video de presentación
 Link: https://drive.google.com/drive/folders/1U48aPt0ut44t6mqqrnoklbXk1oAqpkhT?usp=sharing

@@ -199,8 +199,8 @@ class InvertIndex:
         query_tfidf = []
 
         for term in query:
-            term_data = self.binary_search(term, index_data)
-            #term_data = self.loop(term, index_data) #posting list
+            #term_data = self.binary_search(term, index_data)
+            term_data = self.loop(term, index_data) #posting list
             if term_data is None:
                 continue
             
