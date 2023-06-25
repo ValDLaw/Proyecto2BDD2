@@ -195,7 +195,7 @@ def consulta():
 
     # Ejecutar la consulta en PostgreSQL y medir el tiempo de ejecución
     start_time = time.time()
-    query = "SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;"
+    query = "SELECT *, ts_rank(vectorized_content, query) rank FROM article, plainto_tsquery('english', %s) query ORDER BY rank DESC LIMIT %s;"
     cursor.execute(query, (parametro, k))
     resultados = cursor.fetchall()
     end_time = time.time()
@@ -294,7 +294,7 @@ CREATE INDEX indexado_gin_index ON ARTICLE USING GIN(vectorized_content);
 Notamos que la query empleada fue la siguiente:  
 
 ``` sql
-SELECT * FROM article WHERE vectorized_content @@ plainto_tsquery('english', %s) LIMIT %s;
+SELECT *, ts_rank(vectorized_content, query) rank FROM article, plainto_tsquery('english', %s) query ORDER BY rank DESC LIMIT %s;
 ```  
 
 ### Diseño del índice con MongoDB  
