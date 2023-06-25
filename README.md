@@ -110,27 +110,27 @@ Para implementar nuestro propio índice invertido, primero realizamos el cálcul
 
 **tfidf.py**
 
-`compute_tf(collection)`: toma una colección de documentos como entrada y calcula la frecuencia de término (tf) para cada término en cada documento. Devuelve un diccionario "doc_tf" que contiene la frecuencia de término de cada documento, y un diccionario llamado "total_tf" que contiene la suma total de la frecuencia de término de cada término en todos los documentos.
+`idf(doc_freq, n_docs)`: Recibe en cuántos documentos de la colección aparece el término y la cantidad de documentos totales que presenta la colección. Se encarga de realizar el cálculo de el idf suavizado. Retornándolo con solo 4 decimales.
 
-`compute_idf(term, idf_freq, term_freq, N)`: calcula la frecuencia inversa de documento (idf) para un término dado. Si el **idf** ya existe se devuelve. De lo contrario, se calcula contando en cuántos documentos aparece el término y usando la fórmula **idf = log10(N/df)**. **N** es el número total de documentos y **df** es el número de documentos en los que aparece el término. El **idf** calculado se almacena en el diccionario "idf_freq" y se devuelve.
+`tf_idf(freq, doc_freq, n_docs)`: se encarga de recibir la frecuencia que aparece el termino en cuestión dado un documento, también en cuántos documentos de la colección aparece el término y la cantidad de documentos totales que presenta la colección. Se encarga de devolver un score de 0 si es que el término no está presente en ningún documento. O hacer el cálculo del tf suavizado en caso contrario. A la vez, usa la función idf previamente descrita y retorna el producto de tf e idf.
+
+`calculate_tf(query, document)`: Es una adaptación del cálculo del tf pero para recibir un término específico como query y contar cuántas veces aparece dado un documento, en este caso una lista de keywords de la query preprocesada.
 
 `cosine_sim(Q, Doc)`: calcula la similitud coseno entre dos vectores: consulta (Q) y documento (Doc). Utiliza np.dot para realizar el producto escalar de los dos vectores y np.linalg.norm para calcular las normas. Devuelve el resultado de la similitud coseno redondeado a 3 decimales.
-
-`create_inverted_index(textos_tfidf)`: crea y muestra la matriz de similitud coseno entre todos los documentos en el conjunto de textos representado por "textos_tfidf".
-
-`compute_tfidf(collection)`: calcula el **tf-idf** para cada término en cada documento en la colección de documentos. Utiliza "compute_tf" para obtener la frecuencia de término. Además, se calcula y almacena la longitud (norma) de cada vector de documento en el diccionario "length". También se crea un índice invertido en "index", donde cada término se asigna a una lista de pairs que contienen el nombre del documento y la frecuencia del término en ese documento.
 
 Luego, construimos el índice invertido a partir de los pesos, en un archivo aparte:
 
 **index.py**
 
-`building(self, textos)`: construye el índice invertido a partir de una colección de textos. Utiliza la función "preprocesar_textos" y luego usa "compute_tfidf" para obtener el índice invertido, la frecuencia inversa de documento (idf) y la longitud de los vectores de documento. Luego guarda todo en el archivo especificado por "index_file" utilizando el método "save_index".
+`SPIMIConstruction(self)`: Se encarga de construir el índice invertido, cargando la data mediante la función loadData(), función la cual se encarga de cargar la data como pandas y le asigna las columnas para trabajar de manera más fácil. Después, recorre toda la data y preprocesa cada uno de los textos, y recorre cada término guardándolo en un diccionario donde se almacena el término, el ID del documento que se está procesando y la frecuencia del término. Cada ves que el diccionario llega a un tamaño de BLOCK_LIMIT, se guarda el bloque en archivo como json, y se vuelve a iterar.
 
-`retrieval(self, query, k)`: realiza una consulta en el índice invertido. Recibe como input la query de texto y una cantidad **k** de documentos más relevantes que se quiere recuperar. Se preprocesa de la consulta con "preprocesar_query" y calcula el **tf-idf** del query y el score de similitud coseno entre el query y los documentos. Se ordena los documentos de forma descendente y regresa los **k** más relevantes.
+`index_blocks(self)`: Es la función que se encarga de cargar todos los bloques del índice invertido en partes, y empieza a hacer un merge de cada uno de los bloques. Por cada merge de bloques, hace un ordenamiento de dicho merge para que esté en orden alfanuméric y retorna el merge final ordenado.
 
-`save_index(self, filename)`: guarda el índice invertido, el **idf** y la longitud de los vectores de documento en un archivo "filename".
+`write_index_tf_idf(self, inverted_dict, n_documents)`: Recorre el índice invertido y lo guarda todo en un archivo calculando su tf, idf. Para posteriormente calcular el tf-idf, y guardar en un archivo de texto el término, el postings list con el id del documento y su tf-idf respectivo.
 
-`load_index(self, filename)`: carga el índice invertido, el **idf** y la longitud de los vectores de documento desde un archivo "filename".
+`load_Index(self)`: Abre el archivo del índice invertido, y lee cada una de las líneas, parseando el término, y la lista de los posting lists.
+
+`retrieve_k_nearest(self, query, k)`: Se encarga de traer los documentos k más cercanos. Cargando la data, con loadData(), preprocesar la query, la cual se encuentra en lenguaje natural, para quedarnos con las keywords, y cargamos el indice con load_Index(). Una vez cargado el índice invertido, se encarga de ver cada una de las keywords de query en el índice, para calcular el score tf_idf por cada documento que lo contenga. Al final, se queda con un diccionario de scores por documento. A dicho diccionario, se le calcula su similitud de coseno, y luego se pasa a ordenar la lista para retornar los primeros k resultados. Siendo estos los documentos que más se acercan a la query en cuestión.
 
 ### Manejo de memoria secundaria
 
