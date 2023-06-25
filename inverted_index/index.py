@@ -161,7 +161,7 @@ class InvertIndex:
     #IMPLEMENTAR BINARY!
     #Index Data es cada linea del documento como un set Term, postinglist
     #siendo postinglist toda una string de docId, tf_idf; docId2, tf_idf;
-    def binary_search(term, index_data):
+    def binary_search(self, term, index_data):
         left = 0
         right = len(index_data) - 1
         while left <= right:
@@ -199,7 +199,7 @@ class InvertIndex:
         query_tfidf = []
 
         for term in query:
-            #term_data = binary_search(term, index_data)
+            #term_data = self.binary_search(term, index_data)
             term_data = self.loop(term, index_data) #posting list
             if term_data is None:
                 continue

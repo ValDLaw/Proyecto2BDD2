@@ -38,7 +38,7 @@ def compute_idf(term, idf_freq, term_freq, N):
 #Para querys
 def calculate_tf(query, document):
     term_frequency = document.count(query)
-    return term_frequency / len(document)
+    return (1+math.log10(term_frequency))
 
 def calculate_idf(query, documents):
     document_frequency = sum(1 for document in documents if query in document)
