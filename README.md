@@ -245,7 +245,7 @@ def consulta():
     }
  ```  
 
-Finalmente, creamos el archivo *selfII.py* que contiene una API con una sól ruta '/consulta'. Esta acepta dos parámetros: el texto de búsqueda y un número entero llamado 'k'. Con el JSON de input, la API realiza una consulta en nuestro índice invertido para obtener los k mejores artículos que coincidan con el texto de búsqueda. Finalmente, se construye una respuesta que incluye la lista de resultados y el tiempo de ejecución de la consulta, y se devuelve como una respuesta JSON.
+- Finalmente, creamos el archivo *selfII.py* que contiene una API con una sól ruta '/consulta'. Esta acepta dos parámetros: el texto de búsqueda y un número entero llamado 'k'. Con el JSON de input, la API realiza una consulta en nuestro índice invertido para obtener los k mejores artículos que coincidan con el texto de búsqueda. Finalmente, se construye una respuesta que incluye la lista de resultados y el tiempo de ejecución de la consulta, y se devuelve como una respuesta JSON.
 
 ``` python
 
@@ -345,6 +345,7 @@ Ejecutamos 5 consultas, usando cada una de las 3 implementaciones de índices de
  <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/94eb9648-4416-4a29-86d1-3630434a3600" alt="Image" />
  <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/9d25119b-7d9f-4a7f-80d6-b4dcc692c838" alt="Image" />
  <img src="https://github.com/ValDLaw/Proyecto2BDD2/assets/91209653/6b7e5f62-539c-49d6-98a8-1b4149f673fe" alt="Image" />
+ <img src="./images/selfii_view.png" alt="Image" />
 </div>
 
 ## Análisis de resultados  
